@@ -323,16 +323,16 @@ header {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-.login-container h1, .registration-container h1 {
+.login-container h1 {
     text-align: center;
 }
 
-.login-container label, .registration-container label {
+.login-container label {
     display: block;
     margin: 10px 0 5px;
 }
 
-.login-container input, .registration-container input {
+.login-container input {
     width: 100%;
     padding: 10px;
     margin-bottom: 10px;
@@ -340,7 +340,7 @@ header {
     border-radius: 3px;
 }
 
-.login-container button, .registration-container button {
+.login-container button {
     width: 100%;
     padding: 10px;
     background-color: #5cb85c;
@@ -350,17 +350,47 @@ header {
     cursor: pointer;
 }
 
-.login-container button:hover, .registration-container button:hover {
+.login-container button:hover {
     background-color: #4cae4c;
 }
 
-/* Zusätzliche Stile für die Registrierungsseite */
-.registration-container p {
-    text-align: center;
-    margin-top: 15px;
+/* Stile für die Registrierungsseite */
+.registration-container {
+    width: 300px;
+    margin: 100px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-.registration-container span {
-    color: blue;
+.registration-container h1 {
+    text-align: center;
+}
+
+.registration-container label {
+    display: block;
+    margin: 10px 0 5px;
+}
+
+.registration-container input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+.registration-container button {
+    width: 100%;
+    padding: 10px;
+    background-color: #5cb85c;
+    color: white;
+    border: none;
+    border-radius: 3px;
     cursor: pointer;
+}
+
+.registration-container button:hover {
+    background-color: #4cae4c;
 }
