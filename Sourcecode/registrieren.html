@@ -23,10 +23,16 @@
         <form action="register.php" method="POST"> <!-- Formular zur Registrierung -->
             <label for="username">Benutzername:</label>
             <input type="text" id="username" name="username" required>
+
             <label for="email">E-Mail:</label>
             <input type="email" id="email" name="email" required>
+
             <label for="password">Passwort:</label>
             <input type="password" id="password" name="password" required>
+
+            <label for="password_confirm">Passwort bestätigen:</label>
+            <input type="password" id="password_confirm" name="password_confirm" required>
+
             <button type="submit">Registrieren</button>
         </form>
         <p>Bereits registriert? <span id="loginButton" style="color: blue; cursor: pointer;" onclick="window.location.href='login.html'">Einloggen</span></p>
