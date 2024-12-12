@@ -17,34 +17,47 @@
             <a href="#" id="logoutLink" class="disabled">Abmelden</a>
         </div>
     </header>
-
+ 
     <div class="search-container">
-        <input type="text" id="searchInput" placeholder="Titel suchen...">
-        <button id="searchButton">Suchen</button>
-    </div>
-
-    <main>
-        <section class="filters">
+        <div class="left-buttons">
             <select id="genreFilter">
                 <option value="">Genre auswählen</option>
                 <!-- Genres werden per JavaScript hinzugefügt -->
             </select>
-            <button id="randomMovie">Zufälliger Titel</button>
-            <span id="genreErrorMessage" class="error-message">Bitte wähle zuerst ein Genre aus</span>
-        </section>
-
+            <button id="randomMovie" onclick="randomTitle()">Zufälliger Titel</button>
+        </div>
+        <input type="text" id="searchInput" placeholder="Titel suchen..." class="search-input">
+        <button id="searchButton">Suchen</button>
+    </div>
+ 
+    <main>
+        <!-- Top Filme/Serien - oberhalb der Favoriten -->
+        <section id="topMovies" class="top-movies-section">
+            <h2 id="topMoviesTitle">Top Filme und Serien</h2>
+            <div id="topMoviesList" class="preview-grid"></div>
+            <button id="loadMoreButton" class="load-more-button">Mehr anzeigen</button>
+        </section>        
+ 
+        <!-- Die normalen Suchergebnisse -->
         <section id="movieResults" class="movie-grid">
             <!-- Hier werden die Filmergebnisse eingefügt -->
         </section>
-
+ 
+        <!-- Favoriten - immer am Ende der Seite -->
         <section id="favorites" class="favorites-section">
             <h2>Meine Favoriten</h2>
-            <div class="favorites-grid">
-                <!-- Hier werden die Favoriten eingefügt -->
-            </div>
+            <div id="favoritesList"></div>
         </section>
+ 
+        <div id="detailContainer" class="detail-container">
+            <!-- Hier wird die Detailansicht eingefügt -->
+        </div>
     </main>
-
+ 
+    <footer>
+        <p>&copy; 2024 FilmFolio</p>
+    </footer>
+ 
     <script src="app.js"></script>
 </body>
 </html>

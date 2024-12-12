@@ -3,59 +3,66 @@
     padding: 0;
     box-sizing: border-box;
 }
-
+ 
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Arial', sans-serif;
     line-height: 1.6;
-    background-color: #f0f0f0;
+    background-color: #f0f9ff; /* Hellblauer Hintergrund */
 }
-
+ 
 header {
-    background-color: #2c3e50;
-    color: white;
+    background-color: #1f3a56; /* Dunklerer Blauton */
+    color: #ffffff;
     padding: 1.5rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
     position: relative;
 }
-
+ 
 .logo {
     font-size: 2.5rem;
     font-weight: bold;
-    color: #3498db;
+    color: #4facfe; /* Helles Blau */
     text-align: center;
     margin-bottom: 1rem;
 }
-
+ 
 .search-container {
     display: flex;
+    align-items: center;
     justify-content: center;
-    margin: 20px 0;
+    margin: 20px auto;
+    max-width: 800px;
 }
-
-#searchInput {
+ 
+.left-buttons {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-right: 10px;
+}
+ 
+.search-input {
     padding: 0.5rem;
-    width: 60%;
-    max-width: 400px;
-    margin-right: 0.5rem;
-    border: 1px solid #ccc;
+    border: 1px solid #dbe9f3;
     border-radius: 4px;
+    max-width: 300px;
 }
-
+ 
 #searchButton {
     padding: 0.5rem 1rem;
-    background-color: #3498db;
+    background-color: #4facfe;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
 }
-
+ 
 #searchButton:hover {
-    background-color: #2980b9;
+    background-color: #4e9fe2;
 }
-
+ 
 .filters {
     display: flex;
     align-items: center;
@@ -63,66 +70,66 @@ header {
     padding: 1rem;
     flex-wrap: wrap;
 }
-
+ 
 #genreFilter {
     padding: 0.5rem 1rem;
-    border: 1px solid #ddd;
+    border: 1px solid #dbe9f3; /* Helleres Blau für den Filter */
     border-radius: 4px;
     font-size: 1rem;
     background-color: white;
     cursor: pointer;
     margin-right: 1rem;
 }
-
+ 
 #genreFilter:hover {
-    border-color: #3498db;
+    border-color: #4facfe;
 }
-
+ 
 #genreFilter:focus {
     outline: none;
-    border-color: #3498db;
-    box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+    border-color: #4facfe;
+    box-shadow: 0 0 5px rgba(79, 172, 254, 0.3);
 }
-
+ 
 #movieResults {
     max-width: 1000px;
     margin: 0 auto;
     padding: 1rem;
 }
-
+ 
 .preview-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 1rem;
     padding: 1rem;
 }
-
+ 
 .preview-card {
     background: white;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     cursor: pointer;
-    transition: transform 0.3s;
+    transition: transform 0.3s, box-shadow 0.3s;
 }
-
+ 
 .preview-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
-
+ 
 .preview-card img {
     width: 100%;
     height: 300px;
     object-fit: cover;
 }
-
+ 
 .preview-card h3 {
     padding: 0.5rem;
     text-align: center;
-    color: #2c3e50;
+    color: #1f3a56; /* Dunkles Blau für den Text */
 }
-
+ 
 .movie-card {
     display: flex;
     width: 100%;
@@ -137,114 +144,157 @@ header {
     padding: 1.5rem;
     gap: 1.5rem;
 }
-
+ 
 .movie-card img {
     width: 200px;
     height: 300px;
     object-fit: cover;
     border-radius: 4px;
 }
-
+ 
 .movie-info {
     flex: 1;
     max-width: 600px;
 }
-
+ 
 .movie-info h3 {
-    color: #2c3e50;
+    color: #1f3a56;
     margin-bottom: 1rem;
 }
-
+ 
 .movie-info p {
     margin-bottom: 0.5rem;
     color: #666;
 }
-
+ 
 .movie-info button {
     margin-top: 1rem;
     margin-right: 0.5rem;
 }
-
+ 
 .favorites-section {
     padding: 1rem;
     max-width: 1000px;
     margin: 0 auto;
 }
-
+ 
 .favorites-section h2 {
-    color: #2c3e50;
+    color: #1f3a56;
     margin-bottom: 1rem;
 }
-
+ 
 .favorites-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 1rem;
 }
-
+ 
 .error-message {
     color: #e74c3c;
     margin-left: 10px;
     display: none;
     font-size: 0.9rem;
 }
-
+ 
 /* Loading Animation */
 .loading {
     text-align: center;
     padding: 2rem;
     color: #666;
 }
-
+ 
+/* Detailansicht-Overlay */
+.detail-overlay {
+    position: fixed; /* Fixiert das Overlay auf dem Bildschirm */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Halbtransparenter Hintergrund */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* Höher als der restliche Inhalt */
+    overflow: hidden; /* Verhindert das Scrollen */
+}
+ 
+/* Styling für das Detailansicht-Fenster */
+.movie-card-detail {
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    max-width: 600px;
+    width: 100%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 10000;
+}
+ 
+/* Styling für den "Schließen"-Button im Detailbereich */
+.movie-card-detail button {
+    background-color: #e74c3c;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+ 
+.movie-card-detail button:hover {
+    background-color: #c0392b;
+}
+ 
 /* Responsive Design */
 @media (max-width: 768px) {
     .logo {
         max-width: 250px;
     }
-
+ 
     .movie-card {
         flex-direction: column;
         padding: 1rem;
     }
-
+ 
     .movie-card img {
         width: 100%;
         height: auto;
         max-height: 400px;
         margin-bottom: 1rem;
     }
-
+ 
     .movie-info {
         max-width: 100%;
     }
-
+ 
     #searchInput {
         width: 80%;
     }
-
+ 
     .filters {
         flex-direction: column;
         align-items: stretch;
     }
-
+ 
     #genreFilter {
         margin-right: 0;
         margin-bottom: 0.5rem;
     }
-
+ 
     .preview-grid {
         grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     }
-
+ 
     .preview-card img {
         height: 225px;
     }
-
+ 
     .preview-card h3 {
         font-size: 0.9rem;
     }
 }
-
+ 
 /* Animations */
 @keyframes fadeIn {
     from {
@@ -256,63 +306,65 @@ header {
         transform: translateY(0);
     }
 }
-
+ 
 .preview-card, .movie-card {
     animation: fadeIn 0.3s ease-out;
 }
-
+ 
 /* Scrollbar Styling */
 ::-webkit-scrollbar {
     width: 10px;
 }
-
+ 
 ::-webkit-scrollbar-track {
     background: #f1f1f1;
 }
-
+ 
 ::-webkit-scrollbar-thumb {
-    background: #888;
+    background: #4facfe;
     border-radius: 5px;
 }
-
+ 
 ::-webkit-scrollbar-thumb:hover {
-    background: #555;
+    background: #4e9fe2;
 }
-
+ 
 .hamburger {
     cursor: pointer;
     font-size: 2rem;
-    color: white;
+    color: #ffffff;
     margin-left: 20px;
 }
-
+ 
 .dropdown {
     display: none;
     position: absolute;
-    right: 20px;
-    top: 60px;
-    background-color: #2c3e50;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    right: 0;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     z-index: 1000;
 }
-
+ 
+.dropdown.show {
+    display: block;
+}
+ 
 .dropdown a {
     display: block;
     padding: 10px;
-    color: white;
+    color: #ffffff;
     text-decoration: none;
 }
-
+ 
 .dropdown a.disabled {
     color: #ccc;
     pointer-events: none;
 }
-
+ 
 .dropdown a:hover {
-    background-color: #3498db;
+    background-color: #4facfe;
 }
-
+ 
 /* Stile für die Login-Seite */
 .login-container, .registration-container {
     width: 300px;
@@ -322,16 +374,16 @@ header {
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
-
+ 
 .login-container h1 {
     text-align: center;
 }
-
+ 
 .login-container label {
     display: block;
     margin: 10px 0 5px;
 }
-
+ 
 .login-container input {
     width: 100%;
     padding: 10px;
@@ -339,21 +391,21 @@ header {
     border: 1px solid #ccc;
     border-radius: 3px;
 }
-
+ 
 .login-container button {
     width: 100%;
     padding: 10px;
-    background-color: #5cb85c;
+    background-color: #4facfe;
     color: white;
     border: none;
     border-radius: 3px;
     cursor: pointer;
 }
-
+ 
 .login-container button:hover {
-    background-color: #4cae4c;
+    background-color: #3d99d1;
 }
-
+ 
 /* Stile für die Registrierungsseite */
 .registration-container {
     width: 300px;
@@ -363,16 +415,16 @@ header {
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
-
+ 
 .registration-container h1 {
     text-align: center;
 }
-
+ 
 .registration-container label {
     display: block;
     margin: 10px 0 5px;
 }
-
+ 
 .registration-container input {
     width: 100%;
     padding: 10px;
@@ -380,17 +432,82 @@ header {
     border: 1px solid #ccc;
     border-radius: 3px;
 }
-
+ 
 .registration-container button {
     width: 100%;
     padding: 10px;
-    background-color: #5cb85c;
+    background-color: #4facfe;
     color: white;
     border: none;
     border-radius: 3px;
     cursor: pointer;
 }
-
+ 
 .registration-container button:hover {
-    background-color: #4cae4c;
+    background-color: #3d99d1;
+}
+ 
+ 
+.top-movies-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+ 
+#topMoviesList {
+    width: 100%;
+}
+ 
+#loadMoreButton {
+    margin-top: 20px; /* Adds space between the list and the button */
+}
+.load-more-button:hover {
+    background-color: #4e9fe2; /* Dunkleres Blau beim Hover */
+}
+ 
+ 
+ 
+/* Allgemeine Button-Stile */
+button {
+    padding: 0.8rem 1.5rem;
+    background-color: #3498db; /* Helles Blau */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s, transform 0.2s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+ 
+button:hover {
+    background-color: #2980b9; /* Dunkleres Blau */
+    transform: translateY(-2px); /* Leichte Anhebung beim Hover */
+}
+ 
+button:active {
+    transform: translateY(0); /* Zurücksetzen der Anhebung beim Klicken */
+}
+ 
+/* Spezifische Stile für den "Mehr anzeigen"-Button */
+.load-more-button {
+    background-color: #4facfe; /* Helles Blau */
+    margin: 20px auto;
+}
+ 
+.load-more-button:hover {
+    background-color: #4e9fe2; /* Dunkleres Blau */
+}
+ 
+#randomMovie, #searchButton {
+    padding: 0.5rem 1rem;
+    background-color: #4facfe; /* Helles Blau */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+ 
+#randomMovie:hover, #searchButton:hover {
+    background-color: #4e9fe2; /* Dunkleres Blau */
 }
