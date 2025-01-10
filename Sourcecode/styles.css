@@ -2,6 +2,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: 'Montserrat', sans-serif;
 }
  
 body {
@@ -21,9 +22,11 @@ header {
 }
  
 .logo {
-    font-size: 2.5rem;
-    font-weight: bold;
-    color: #4facfe; /* Helles Blau */
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     text-align: center;
     margin-bottom: 1rem;
 }
@@ -522,18 +525,55 @@ button:active {
 .popup {
     display: none;
     position: fixed;
-    top: 50%;
+    top: 20px;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translateX(-50%);
     background-color: #4facfe;
     color: white;
-    padding: 20px;
+    padding: 15px 30px;
     border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     z-index: 1000;
-    animation: fadeIn 0.3s ease-out;
+    animation: slideDown 0.5s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        top: -100px;
+        opacity: 0;
+    }
+    to {
+        top: 20px;
+        opacity: 1;
+    }
 }
 
 .popup-content {
     text-align: center;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+/* Überschriften */
+h1, h2, h3 {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* Normaler Text */
+p, label, input, button {
+    font-weight: 400;
+    letter-spacing: 0.3px;
+}
+
+/* Navigation und Buttons */
+.dropdown a, button {
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+/* Popup-Text */
+.popup-content {
+    font-weight: 500;
+    letter-spacing: 0.3px;
 }
