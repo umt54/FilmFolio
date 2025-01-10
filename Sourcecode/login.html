@@ -4,35 +4,73 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Verlinkung zur CSS-Datei -->
-    <script>
-        function navigateToRegister() {
-            window.location.href = 'registrieren.html'; // Navigiere zur Registrierungsseite
-        }
-    </script>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <header>
         <div class="logo" onclick="window.location.href='index.html';" style="cursor: pointer;">FilmFolio</div>
-        <div class="hamburger" id="hamburger">
-            &#9776; <!-- Hamburger Icon -->
-        </div>
-        <div class="dropdown" id="dropdown">
-            <a href="login.html" id="loginLink">Anmelden</a>
-            <a href="#" id="logoutLink" class="disabled">Abmelden</a>
-        </div>
     </header>
 
     <div class="login-container">
         <h1>Login</h1>
-        <form action="login.php" method="POST"> <!-- Formular zur Anmeldung -->
-            <label for="username">Benutzername:</label>
-            <input type="text" id="username" name="username" required>
+        <form id="loginForm">
+            <label for="email">E-Mail:</label>
+            <input type="email" id="email" required>
+            
             <label for="password">Passwort:</label>
-            <input type="password" id="password" name="password" required>
+            <input type="password" id="password" required>
+            
             <button type="submit">Einloggen</button>
         </form>
-        <p>Kein Benutzer? <span id="registerButton" style="color: blue; cursor: pointer;" onclick="navigateToRegister()">Registrieren</span></p>
+        <p>Noch kein Konto? <a href="registrieren.html">Registrieren</a></p>
+        <p id="errorMessage" style="color: red;"></p>
     </div>
+
+    <div id="successPopup" class="popup">
+        <div class="popup-content">
+            <p>Erfolgreich angemeldet!</p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import firebaseConfig from './firebase-config.js';
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('errorMessage');
+
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                if (userCredential.user) {
+                    const popup = document.getElementById('successPopup');
+                    popup.style.display = 'block';
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 2000);
+                }
+            } catch (error) {
+                switch (error.code) {
+                    case 'auth/invalid-email':
+                        errorMessage.textContent = 'Ungültige E-Mail-Adresse';
+                        break;
+                    case 'auth/user-not-found':
+                        errorMessage.textContent = 'Benutzer nicht gefunden';
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage.textContent = 'Falsches Passwort';
+                        break;
+                    default:
+                        errorMessage.textContent = 'Ein Fehler ist aufgetreten';
+                }
+            }
+        });
+    </script>
 </body>
 </html>

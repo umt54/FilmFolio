@@ -5,6 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FilmFolio</title>
     <link rel="stylesheet" href="styles.css">
+    <script type="module">
+        // Importiere die benötigten Funktionen aus den SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import firebaseConfig from './firebase-config.js';
+
+        // Firebase initialisieren
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Überprüfe den Anmeldestatus
+        onAuthStateChanged(auth, (user) => {
+            const loginLink = document.getElementById('loginLink');
+            const logoutLink = document.getElementById('logoutLink');
+            
+            if (user) {
+                // Benutzer ist angemeldet
+                loginLink.classList.add('disabled');
+                logoutLink.classList.remove('disabled');
+                loginLink.href = '#';
+                logoutLink.href = '#';
+            } else {
+                // Benutzer ist nicht angemeldet
+                loginLink.classList.remove('disabled');
+                logoutLink.classList.add('disabled');
+                loginLink.href = 'login.html';
+                logoutLink.href = '#';
+            }
+        });
+
+        // Abmelde-Funktion
+        document.getElementById('logoutLink').addEventListener('click', async (e) => {
+            e.preventDefault();
+            if (e.target.classList.contains('disabled')) return;
+            
+            try {
+                await signOut(auth);
+                const popup = document.getElementById('logoutPopup');
+                popup.style.display = 'block';
+                setTimeout(() => {
+                    popup.style.display = 'none';
+                    window.location.href = 'index.html';
+                }, 2000);
+            } catch (error) {
+                console.error('Fehler beim Abmelden:', error);
+            }
+        });
+    </script>
 </head>
 <body>
     <header>
@@ -17,7 +65,6 @@
             <a href="#" id="logoutLink" class="disabled">Abmelden</a>
         </div>
     </header>
- 
     <div class="search-container">
         <div class="left-buttons">
             <select id="genreFilter">
@@ -29,35 +76,54 @@
         <input type="text" id="searchInput" placeholder="Titel suchen..." class="search-input">
         <button id="searchButton">Suchen</button>
     </div>
- 
     <main>
-        <!-- Top Filme/Serien - oberhalb der Favoriten -->
+        <!-- Top Filme/Serien -->
         <section id="topMovies" class="top-movies-section">
             <h2 id="topMoviesTitle">Top Filme und Serien</h2>
             <div id="topMoviesList" class="preview-grid"></div>
-            <button id="loadMoreButton" class="load-more-button">Mehr anzeigen</button>
         </section>        
- 
-        <!-- Die normalen Suchergebnisse -->
+        <!-- Suchergebnisse -->
         <section id="movieResults" class="movie-grid">
             <!-- Hier werden die Filmergebnisse eingefügt -->
         </section>
- 
-        <!-- Favoriten - immer am Ende der Seite -->
+        <!-- Button außerhalb der Suchergebnisse -->
+        <div class="load-more-container">
+            <button id="loadMoreButton" class="load-more-button">Mehr anzeigen</button>
+        </div>
+        <!-- Favoriten -->
         <section id="favorites" class="favorites-section">
             <h2>Meine Favoriten</h2>
             <div id="favoritesList"></div>
         </section>
- 
         <div id="detailContainer" class="detail-container">
             <!-- Hier wird die Detailansicht eingefügt -->
         </div>
     </main>
- 
     <footer>
         <p>&copy; 2024 FilmFolio</p>
     </footer>
- 
     <script src="app.js"></script>
+    <script>
+        function toggleDropdown() {
+            const dropdown = document.getElementById('dropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // Schließe das Dropdown wenn außerhalb geklickt wird
+        document.addEventListener('click', (e) => {
+            if (!e.target.matches('.hamburger') && !e.target.matches('.dropdown')) {
+                const dropdown = document.getElementById('dropdown');
+                if (dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                }
+            }
+        });
+    </script>
+    <!-- Füge das Abmelde-Popup hinzu -->
+    <div id="logoutPopup" class="popup">
+        <div class="popup-content">
+            <p>Erfolgreich abgemeldet!</p>
+        </div>
+    </div>
 </body>
 </html>

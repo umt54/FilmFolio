@@ -340,9 +340,12 @@ header {
     display: none;
     position: absolute;
     right: 0;
-    background-color: white;
+    top: 100%;
+    background-color: #1f3a56;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     z-index: 1000;
+    border-radius: 4px;
+    min-width: 150px;
 }
  
 .dropdown.show {
@@ -351,18 +354,20 @@ header {
  
 .dropdown a {
     display: block;
-    padding: 10px;
+    padding: 12px 20px;
     color: #ffffff;
     text-decoration: none;
+    transition: all 0.3s ease;
+}
+ 
+.dropdown a:not(.disabled):hover {
+    background-color: #4facfe;
 }
  
 .dropdown a.disabled {
-    color: #ccc;
-    pointer-events: none;
-}
- 
-.dropdown a:hover {
-    background-color: #4facfe;
+    color: #999;
+    opacity: 0.5;
+    cursor: not-allowed;
 }
  
 /* Stile für die Login-Seite */
@@ -449,24 +454,27 @@ header {
  
  
 .top-movies-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    padding: 1rem;
+    max-width: 1000px;
+    margin: 0 auto;
+    text-align: center;
 }
- 
-#topMoviesList {
-    width: 100%;
+
+.load-more-button {
+    padding: 0.8rem 1.5rem;
+    background-color: #4facfe; /* Helles Blau */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: block;
+    margin: 20px auto;
 }
- 
-#loadMoreButton {
-    margin-top: 20px; /* Adds space between the list and the button */
-}
+
 .load-more-button:hover {
-    background-color: #4e9fe2; /* Dunkleres Blau beim Hover */
+    background-color: #4e9fe2; /* Dunkleres Blau */
 }
- 
- 
- 
+
 /* Allgemeine Button-Stile */
 button {
     padding: 0.8rem 1.5rem;
@@ -489,16 +497,7 @@ button:active {
     transform: translateY(0); /* Zurücksetzen der Anhebung beim Klicken */
 }
  
-/* Spezifische Stile für den "Mehr anzeigen"-Button */
-.load-more-button {
-    background-color: #4facfe; /* Helles Blau */
-    margin: 20px auto;
-}
- 
-.load-more-button:hover {
-    background-color: #4e9fe2; /* Dunkleres Blau */
-}
- 
+
 #randomMovie, #searchButton {
     padding: 0.5rem 1rem;
     background-color: #4facfe; /* Helles Blau */
@@ -510,4 +509,31 @@ button:active {
  
 #randomMovie:hover, #searchButton:hover {
     background-color: #4e9fe2; /* Dunkleres Blau */
+}
+
+.preview-card .rating {
+    text-align: center;
+    color: #666;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+
+.popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #4facfe;
+    color: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.popup-content {
+    text-align: center;
 }

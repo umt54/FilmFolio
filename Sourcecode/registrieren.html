@@ -4,38 +4,80 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrierung</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Verlinkung zur CSS-Datei -->
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <header>
         <div class="logo" onclick="window.location.href='index.html';" style="cursor: pointer;">FilmFolio</div>
-        <div class="hamburger" id="hamburger">
-            &#9776; <!-- Hamburger Icon -->
-        </div>
-        <div class="dropdown" id="dropdown">
-            <a href="login.html" id="loginLink">Anmelden</a>
-            <a href="#" id="logoutLink" class="disabled">Abmelden</a>
-        </div>
     </header>
 
     <div class="registration-container">
         <h1>Registrierung</h1>
-        <form action="register.php" method="POST"> <!-- Formular zur Registrierung -->
-            <label for="username">Benutzername:</label>
-            <input type="text" id="username" name="username" required>
-
+        <form id="registerForm">
             <label for="email">E-Mail:</label>
-            <input type="email" id="email" name="email" required>
-
+            <input type="email" id="email" required>
+            
             <label for="password">Passwort:</label>
-            <input type="password" id="password" name="password" required>
-
-            <label for="password_confirm">Passwort bestätigen:</label>
-            <input type="password" id="password_confirm" name="password_confirm" required>
-
+            <input type="password" id="password" required minlength="6">
+            
+            <label for="confirmPassword">Passwort bestätigen:</label>
+            <input type="password" id="confirmPassword" required minlength="6">
+            
             <button type="submit">Registrieren</button>
         </form>
-        <p>Bereits registriert? <span id="loginButton" style="color: blue; cursor: pointer;" onclick="window.location.href='login.html'">Einloggen</span></p>
+        <p>Bereits registriert? <a href="login.html">Zum Login</a></p>
+        <p id="errorMessage" style="color: red;"></p>
     </div>
+
+    <div id="successPopup" class="popup">
+        <div class="popup-content">
+            <p>Erfolgreich registriert!</p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import firebaseConfig from './firebase-config.js';
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const errorMessage = document.getElementById('errorMessage');
+
+            if (password !== confirmPassword) {
+                errorMessage.textContent = 'Die Passwörter stimmen nicht überein';
+                return;
+            }
+
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                const popup = document.getElementById('successPopup');
+                popup.style.display = 'block';
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+            } catch (error) {
+                switch (error.code) {
+                    case 'auth/email-already-in-use':
+                        errorMessage.textContent = 'Diese E-Mail-Adresse wird bereits verwendet';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage.textContent = 'Ungültige E-Mail-Adresse';
+                        break;
+                    case 'auth/weak-password':
+                        errorMessage.textContent = 'Das Passwort muss mindestens 6 Zeichen lang sein';
+                        break;
+                    default:
+                        errorMessage.textContent = 'Ein Fehler ist aufgetreten';
+                }
+            }
+        });
+    </script>
 </body>
 </html>
