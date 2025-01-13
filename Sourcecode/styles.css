@@ -5,10 +5,35 @@
     font-family: 'Montserrat', sans-serif;
 }
  
+:root {
+    --background-color: #f0f9ff;
+    --text-color: #333;
+    --header-bg: #1f3a56;
+    --card-bg: white;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --input-border: #dbe9f3;
+    --heading-color: #1f3a56;
+    --rating-color: #666;
+    --link-color: #4facfe;
+}
+
+[data-theme="dark"] {
+    --background-color: #1a1a1a;
+    --text-color: #ffffff;
+    --header-bg: #2c2c2c;
+    --card-bg: #333333;
+    --shadow-color: rgba(255, 255, 255, 0.1);
+    --input-border: #404040;
+    --heading-color: #ffffff;
+    --rating-color: #b0b0b0;
+    --link-color: #6eb6ff;
+}
+
 body {
     font-family: 'Arial', sans-serif;
     line-height: 1.6;
-    background-color: #f0f9ff; /* Hellblauer Hintergrund */
+    background-color: var(--background-color);
+    color: var(--text-color);
 }
  
 header {
@@ -108,7 +133,7 @@ header {
 }
  
 .preview-card {
-    background: white;
+    background: var(--card-bg);
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -130,13 +155,14 @@ header {
 .preview-card h3 {
     padding: 0.5rem;
     text-align: center;
-    color: #1f3a56; /* Dunkles Blau für den Text */
+    color: var(--heading-color);
 }
  
 .movie-card {
     display: flex;
     width: 100%;
-    background: white;
+    background: var(--card-bg);
+    color: var(--text-color);
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -161,13 +187,13 @@ header {
 }
  
 .movie-info h3 {
-    color: #1f3a56;
+    color: var(--heading-color);
     margin-bottom: 1rem;
 }
  
 .movie-info p {
     margin-bottom: 0.5rem;
-    color: #666;
+    color: var(--text-color);
 }
  
 .movie-info button {
@@ -378,7 +404,7 @@ header {
     width: 300px;
     margin: 100px auto;
     padding: 20px;
-    background: white;
+    background: var(--card-bg);
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
@@ -419,7 +445,7 @@ header {
     width: 300px;
     margin: 100px auto;
     padding: 20px;
-    background: white;
+    background: var(--card-bg);
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
@@ -516,7 +542,7 @@ button:active {
 
 .preview-card .rating {
     text-align: center;
-    color: #666;
+    color: var(--rating-color);
     margin-top: 5px;
     margin-bottom: 10px;
     font-size: 0.9rem;
@@ -576,4 +602,230 @@ p, label, input, button {
 .popup-content {
     font-weight: 500;
     letter-spacing: 0.3px;
+}
+
+.theme-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: var(--header-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 10px var(--shadow-color);
+    z-index: 1000;
+    transition: transform 0.3s;
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1);
+}
+
+.theme-toggle i {
+    color: #fff;
+    font-size: 1.5rem;
+}
+
+/* Anpassungen für Dark Mode */
+.preview-card {
+    background: var(--card-bg);
+}
+
+.login-container, .registration-container {
+    background: var(--card-bg);
+}
+
+input, select {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border: 1px solid var(--input-border);
+}
+
+/* Anpassung der Überschriften */
+.preview-card h3, .movie-info h3 {
+    color: var(--heading-color);
+}
+
+/* Anpassung der Bewertungen */
+.preview-card .rating {
+    color: var(--rating-color);
+}
+
+/* Anpassung der Links */
+a {
+    color: var(--link-color);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Anpassung der Formulare */
+input, select {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border: 1px solid var(--input-border);
+}
+
+/* Anpassung der Movie-Card */
+.movie-card {
+    background: var(--card-bg);
+    color: var(--text-color);
+}
+
+.movie-info p {
+    color: var(--text-color);
+}
+
+/* Dropdown und Select Styling */
+select {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border: 1px solid var(--input-border);
+    padding: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+select option {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+}
+
+/* Dark Mode spezifische Anpassungen für Select */
+[data-theme="dark"] select {
+    background-color: #2c2c2c;
+    color: #ffffff;
+    border: 1px solid #404040;
+}
+
+[data-theme="dark"] select option {
+    background-color: #2c2c2c;
+    color: #ffffff;
+}
+
+/* Hover-Effekt für Options im Dark Mode */
+[data-theme="dark"] select option:hover,
+[data-theme="dark"] select option:focus {
+    background-color: #4facfe;
+}
+
+/* Anpassung der Placeholder-Farbe im Dark Mode */
+[data-theme="dark"] select::placeholder {
+    color: #ffffff;
+    opacity: 0.7;
+}
+
+/* Konsistentes Styling für alle Eingabefelder im Dark Mode */
+[data-theme="dark"] input,
+[data-theme="dark"] select {
+    background-color: #2c2c2c;
+    color: #ffffff;
+    border: 1px solid #404040;
+}
+
+/* Login/Register Container Dark Mode */
+.login-container, 
+.registration-container {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+}
+
+.login-container h1, 
+.registration-container h1 {
+    color: var(--heading-color);
+}
+
+.login-container label, 
+.registration-container label {
+    color: var(--text-color);
+}
+
+.login-container input, 
+.registration-container input {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border: 1px solid var(--input-border);
+}
+
+.login-container p, 
+.registration-container p {
+    color: var(--text-color);
+}
+
+/* Weitere Dark Mode Anpassungen */
+.favorites-section h2,
+#topMoviesTitle,
+.login-container h1,
+.registration-container h1 {
+    color: var(--heading-color);
+}
+
+/* Footer Anpassung */
+footer {
+    color: var(--text-color);
+}
+
+/* Error Message Anpassung */
+.error-message {
+    color: #ff4444;
+}
+
+/* Placeholder Text Anpassung */
+input::placeholder {
+    color: var(--text-color);
+    opacity: 0.7;
+}
+
+/* Dropdown Anpassungen */
+.dropdown {
+    background-color: var(--card-bg);
+}
+
+.dropdown a {
+    color: var(--text-color);
+}
+
+.dropdown a:hover {
+    background-color: var(--header-bg);
+}
+
+/* Dropdown und Select Styling für Dark Mode */
+[data-theme="dark"] select {
+    background-color: #2c2c2c;
+    color: #ffffff;
+    border: 1px solid #404040;
+}
+
+[data-theme="dark"] select option {
+    background-color: #2c2c2c;
+    color: #ffffff;
+}
+
+/* Spezifische Anpassung für das Genre-Filter im Dark Mode */
+[data-theme="dark"] #genreFilter {
+    background-color: #2c2c2c;
+    color: #ffffff;
+    border: 1px solid #404040;
+}
+
+[data-theme="dark"] #genreFilter option {
+    background-color: #2c2c2c;
+    color: #ffffff;
+}
+
+/* Hover-Effekt für das Genre-Filter im Dark Mode */
+[data-theme="dark"] #genreFilter:hover {
+    border-color: #4facfe;
+}
+
+[data-theme="dark"] #genreFilter:focus {
+    outline: none;
+    border-color: #4facfe;
+    box-shadow: 0 0 5px rgba(79, 172, 254, 0.3);
 }
