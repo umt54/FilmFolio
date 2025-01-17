@@ -102,57 +102,68 @@ async function getSeriesDetails(seriesId) {
 async function showDetailCard(item, container) {
     let seasonInfo = '';
     let streamingInfo = '';
- 
+
     try {
         const streamingResponse = await fetch(`https://api.themoviedb.org/3/${item.mediaType}/${item.id}/watch/providers`, options);
         const streamingData = await streamingResponse.json();
- 
+        console.log('Streaming Data:', streamingData);
+
         if (streamingData.results && streamingData.results.DE) {
             const providers = streamingData.results.DE;
-            if (providers.flatrate) {
+            if (providers.flatrate && providers.flatrate.length > 0) {
                 streamingInfo = `
-<div class="streaming-info">
-<h4>Verfügbar zum Streamen auf:</h4>
-<div class="provider-list">
+                    <div class="streaming-info">
+                        <h4>Verfügbar zum Streamen auf:</h4>
+                        <div class="provider-list">
                             ${providers.flatrate.map(provider => `
-<div class="provider">
-<img src="https://image.tmdb.org/t/p/original${provider.logo_path}" alt="${provider.provider_name}" title="${provider.provider_name}">
-</div>
+                                <div class="provider">
+                                    <img src="https://image.tmdb.org/t/p/original${provider.logo_path}" 
+                                         alt="${provider.provider_name}" 
+                                         title="${provider.provider_name}">
+                                </div>
                             `).join('')}
-</div>
-</div>
-                `;
+                        </div>
+                    </div>`;
+            } else {
+                streamingInfo = `
+                    <div class="streaming-info">
+                        <p class="no-streaming">Keine Streaming-Anbieter verfügbar</p>
+                    </div>`;
             }
         }
     } catch (error) {
         console.error('Fehler beim Laden der Streaming-Informationen:', error);
+        streamingInfo = `
+            <div class="streaming-info">
+                <p class="error-streaming">Fehler beim Laden der Streaming-Informationen</p>
+            </div>`;
     }
- 
+
     if (item.mediaType === 'tv') {
         const seriesDetails = await getSeriesDetails(item.id);
         if (seriesDetails) {
             const totalEpisodes = seriesDetails.seasons.reduce((sum, season) => sum + (season.episode_count || 0), 0);
             seasonInfo = `
-<p>Staffeln: ${seriesDetails.number_of_seasons}</p>
-<p>Folgen insgesamt: ${totalEpisodes}</p>
+                <p>Staffeln: ${seriesDetails.number_of_seasons}</p>
+                <p>Folgen insgesamt: ${totalEpisodes}</p>
             `;
         }
     }
- 
+
     const detailCardOverlay = document.createElement('div');
     detailCardOverlay.className = 'detail-overlay';
     detailCardOverlay.innerHTML = `
-<div class="movie-card">
-<img src="${item.poster_path
-                ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
-                : './images/no-poster.jpg'}" alt="${item.title || 'Kein Titel verfügbar'}">
-<div class="movie-info">
-<h3>${item.title || 'Kein Titel verfügbar'}</h3>
-<p>${item.overview || 'Keine Beschreibung verfügbar'}</p>
-                ${seasonInfo}${streamingInfo}
-<button onclick="closeDetailCard()">Zurück</button>
-</div>
-</div>
+        <div class="movie-card">
+            <img src="${item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : './images/no-poster.jpg'}" 
+                 alt="${item.title || 'Kein Titel verfügbar'}">
+            <div class="movie-info">
+                <h3>${item.title || 'Kein Titel verfügbar'}</h3>
+                <p>${item.overview || 'Keine Beschreibung verfügbar'}</p>
+                ${seasonInfo}
+                ${streamingInfo}
+                <button onclick="closeDetailCard()">Zurück</button>
+            </div>
+        </div>
     `;
     document.body.appendChild(detailCardOverlay);
 }
