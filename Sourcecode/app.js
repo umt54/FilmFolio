@@ -113,13 +113,13 @@ async function showDetailCard(item, container) {
             if (providers.flatrate && providers.flatrate.length > 0) {
                 streamingInfo = `
                     <div class="streaming-info">
-                        <h4>Verfügbar zum Streamen auf:</h4>
+                        <h4>✨ Verfügbar auf:</h4>
                         <div class="provider-list">
                             ${providers.flatrate.map(provider => `
-                                <div class="provider">
+                                <div class="provider" title="${provider.provider_name}">
                                     <img src="https://image.tmdb.org/t/p/original${provider.logo_path}" 
-                                         alt="${provider.provider_name}" 
-                                         title="${provider.provider_name}">
+                                         alt="${provider.provider_name}">
+                                    <span class="provider-name">${provider.provider_name}</span>
                                 </div>
                             `).join('')}
                         </div>
@@ -127,7 +127,7 @@ async function showDetailCard(item, container) {
             } else {
                 streamingInfo = `
                     <div class="streaming-info">
-                        <p class="no-streaming">Keine Streaming-Anbieter verfügbar</p>
+                        <p class="no-streaming">💔 Aktuell nicht zum Streamen verfügbar</p>
                     </div>`;
             }
         }
@@ -135,7 +135,7 @@ async function showDetailCard(item, container) {
         console.error('Fehler beim Laden der Streaming-Informationen:', error);
         streamingInfo = `
             <div class="streaming-info">
-                <p class="error-streaming">Fehler beim Laden der Streaming-Informationen</p>
+                <p class="error-streaming">⚠️ Streaming-Informationen konnten nicht geladen werden</p>
             </div>`;
     }
 
@@ -144,8 +144,8 @@ async function showDetailCard(item, container) {
         if (seriesDetails) {
             const totalEpisodes = seriesDetails.seasons.reduce((sum, season) => sum + (season.episode_count || 0), 0);
             seasonInfo = `
-                <p>Staffeln: ${seriesDetails.number_of_seasons}</p>
-                <p>Folgen insgesamt: ${totalEpisodes}</p>
+                <p>📺 Staffeln: ${seriesDetails.number_of_seasons}</p>
+                <p>🎬 Folgen insgesamt: ${totalEpisodes}</p>
             `;
         }
     }
@@ -161,7 +161,7 @@ async function showDetailCard(item, container) {
                 <p>${item.overview || 'Keine Beschreibung verfügbar'}</p>
                 ${seasonInfo}
                 ${streamingInfo}
-                <button onclick="closeDetailCard()">Zurück</button>
+                <button onclick="closeDetailCard()" class="close-button">← Zurück</button>
             </div>
         </div>
     `;
