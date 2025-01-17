@@ -1,155 +1,169 @@
-    const apiKey = 'b404d8bc1c229e9cb771c179755ad733';
-    const options = {
-        method: 'GET',
-        headers: {
-            accept: 'application/json',
-            Authorization: 'Bearer b404d8bc1c229e9cb771c179755ad733'
+const apiKey = 'b404d8bc1c229e9cb771c179755ad733';
+const options = {
+    method: 'GET',
+    headers: {
+        accept: 'application/json',
+        Authorization: `Bearer ${apiKey}`
+    }
+};
+ 
+let selectedGenre = '';
+let currentPage = 1; // Aktuelle Seite für die Pagination
+const itemsPerPage = 10; // Anzahl der Elemente pro Seite
+let allResults = []; // Alle bisher geladenen Ergebnisse
+let favorites = []; // Favoriten-Array
+ 
+// Suchfunktion
+document.getElementById('searchButton').addEventListener('click', performSearch);
+document.getElementById('searchInput').addEventListener('keyup', (e) => {
+    if (e.key === 'Enter') {
+        performSearch();
+    }
+});
+ 
+async function performSearch() {
+    const searchTerm = document.getElementById('searchInput').value.trim();
+    if (!searchTerm) return;
+ 
+    try {
+        const movieResults = document.getElementById('movieResults');
+        movieResults.innerHTML = '<div class="loading">Suche läuft...</div>';
+ 
+        const [movieResponse, tvResponse] = await Promise.all([
+            fetch(`https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&language=de&query=${encodeURIComponent(searchTerm)}`, options),
+            fetch(`https://api.themoviedb.org/3/search/tv?api_key=${apiKey}&language=de&query=${encodeURIComponent(searchTerm)}`, options)
+        ]);
+ 
+        const [movieData, tvData] = await Promise.all([movieResponse.json(), tvResponse.json()]);
+ 
+        const movies = movieData.results.map(movie => ({
+            ...movie,
+            mediaType: 'movie',
+            title: movie.title,
+            release_date: movie.release_date
+        }));
+ 
+        const tvShows = tvData.results.map(show => ({
+            ...show,
+            mediaType: 'tv',
+            title: show.name,
+            release_date: show.first_air_date
+        }));
+ 
+        allResults = [...movies, ...tvShows];
+        movieResults.innerHTML = '';
+ 
+        if (allResults.length === 0) {
+            movieResults.innerHTML = '<p>Keine Ergebnisse gefunden</p>';
+            return;
         }
-    };
-
-    let selectedGenre = '';
-    let currentPage = 1; // Aktuelle Seite für die Pagination
-    const itemsPerPage = 10; // Anzahl der Elemente pro Seite
-    let allResults = []; // Alle bisher geladenen Ergebnisse
-    let favorites = []; // Favoriten-Array
-
-    // Suchfunktion
-    document.getElementById('searchButton').addEventListener('click', performSearch);
-    document.getElementById('searchInput').addEventListener('keyup', (e) => {
-        if (e.key === 'Enter') {
-            performSearch();
-        }
-    });
-
-    async function performSearch() {
-        const searchTerm = document.getElementById('searchInput').value.trim();
-        if (!searchTerm) return;
-    
-        try {
-            const movieResults = document.getElementById('movieResults');
-            movieResults.innerHTML = '<div class="loading">Suche läuft...</div>';
-    
-            const [movieResponse, tvResponse] = await Promise.all([
-                fetch(`https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&language=de&query=${encodeURIComponent(searchTerm)}`, options),
-                fetch(`https://api.themoviedb.org/3/search/tv?api_key=${apiKey}&language=de&query=${encodeURIComponent(searchTerm)}`, options)
-            ]);
-    
-            const [movieData, tvData] = await Promise.all([movieResponse.json(), tvResponse.json()]);
-    
-            const movies = movieData.results.map(movie => ({
-                ...movie,
-                mediaType: 'movie',
-                title: movie.title,
-                release_date: movie.release_date
-            }));
-    
-            const tvShows = tvData.results.map(show => ({
-                ...show,
-                mediaType: 'tv',
-                title: show.name,
-                release_date: show.first_air_date
-            }));
-    
-            allResults = [...movies, ...tvShows]; // global allResults nicht überschreiben
-            movieResults.innerHTML = '';
-    
-            if (allResults.length === 0) {
-                movieResults.innerHTML = '<p>Keine Ergebnisse gefunden</p>';
-                return;
-            }
-    
-            // Erstelle Grid-Container für die Vorschaukarten
-            const gridContainer = document.createElement('div');
-            gridContainer.className = 'preview-grid';
-            movieResults.appendChild(gridContainer);
-    
-            allResults.forEach(item => {
-                // Erstelle Vorschaukarte
-                const previewCard = document.createElement('div');
-                previewCard.className = 'preview-card';
-                previewCard.innerHTML = `
-                    <img src="${item.poster_path 
-                        ? `https://image.tmdb.org/t/p/w500${item.poster_path}` 
-                        : './images/no-poster.jpg'}" 
-                        alt="${item.title || 'Kein Titel verfügbar'}"
-                    >
-                    <h3>${item.title || 'Kein Titel verfügbar'}</h3>
-                    <p class="rating">⭐ ${item.vote_average ? item.vote_average.toFixed(1) : 'N/A'}/10</p>
-                `;
-    
-                // Click Event für die Vorschaukarte
-                previewCard.addEventListener('click', () => {
-                    showDetailCard(item, movieResults);
-                });
-    
-                gridContainer.appendChild(previewCard);
+ 
+        // Erstelle Grid-Container für die Vorschaukarten
+        const gridContainer = document.createElement('div');
+        gridContainer.className = 'preview-grid';
+        movieResults.appendChild(gridContainer);
+ 
+        allResults.forEach(item => {
+            const previewCard = document.createElement('div');
+            previewCard.className = 'preview-card';
+            previewCard.innerHTML = `
+<img src="${item.poster_path
+                    ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
+                    : './images/no-poster.jpg'}" alt="${item.title || 'Kein Titel verfügbar'}">
+<h3>${item.title || 'Kein Titel verfügbar'}</h3>
+<p class="rating">⭐ ${item.vote_average ? item.vote_average.toFixed(1) : 'N/A'}/10</p>
+            `;
+ 
+            previewCard.addEventListener('click', () => {
+                showDetailCard(item, movieResults);
             });
-    
-        } catch (error) {
-            console.error('Fehler bei der Suche:', error);
-            movieResults.innerHTML = '<p>Ein Fehler ist aufgetreten</p>';
-        }
+ 
+            gridContainer.appendChild(previewCard);
+        });
+    } catch (error) {
+        console.error('Fehler bei der Suche:', error);
+        movieResults.innerHTML = '<p>Ein Fehler ist aufgetreten</p>';
     }
-
-    // Funktion zum Abrufen der Seriendetails
-    async function getSeriesDetails(seriesId) {
-        try {
-            const response = await fetch(`https://api.themoviedb.org/3/tv/${seriesId}?api_key=${apiKey}&language=de`, options);
-            const data = await response.json();
-            return data;
-        } catch (error) {
-            console.error('Fehler beim Laden der Seriendetails:', error);
-            return null;
-        }
+}
+ 
+// Funktion zum Abrufen der Seriendetails
+async function getSeriesDetails(seriesId) {
+    try {
+        const response = await fetch(`https://api.themoviedb.org/3/tv/${seriesId}?api_key=${apiKey}&language=de`, options);
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Fehler beim Laden der Seriendetails:', error);
+        return null;
     }
-
-    // Modifizierte Version der Detailkartenanzeige
-    async function showDetailCard(item, container) {
-        let seasonInfo = '';
-        if (item.mediaType === 'tv') {
-            const seriesDetails = await getSeriesDetails(item.id);
-            if (seriesDetails) {
-                const totalEpisodes = seriesDetails.seasons.reduce((sum, season) => sum + (season.episode_count || 0), 0);
-                seasonInfo = `
-                    <p>Staffeln: ${seriesDetails.number_of_seasons}</p>
-                    <p>Folgen insgesamt: ${totalEpisodes}</p>
+}
+ 
+// Detailkartenanzeige
+async function showDetailCard(item, container) {
+    let seasonInfo = '';
+    let streamingInfo = '';
+ 
+    try {
+        const streamingResponse = await fetch(`https://api.themoviedb.org/3/${item.mediaType}/${item.id}/watch/providers`, options);
+        const streamingData = await streamingResponse.json();
+ 
+        if (streamingData.results && streamingData.results.DE) {
+            const providers = streamingData.results.DE;
+            if (providers.flatrate) {
+                streamingInfo = `
+<div class="streaming-info">
+<h4>Verfügbar zum Streamen auf:</h4>
+<div class="provider-list">
+                            ${providers.flatrate.map(provider => `
+<div class="provider">
+<img src="https://image.tmdb.org/t/p/original${provider.logo_path}" alt="${provider.provider_name}" title="${provider.provider_name}">
+</div>
+                            `).join('')}
+</div>
+</div>
                 `;
             }
         }
-
-        // Detailkarte in einem Overlay erstellen
-        const detailCardOverlay = document.createElement('div');
-        detailCardOverlay.className = 'detail-overlay'; // Die Detailansicht wird in einem Overlay angezeigt
-        detailCardOverlay.innerHTML = `
-            <div class="movie-card">
-                <img src="${item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : './images/no-poster.jpg'}" alt="${item.title || 'Kein Titel verfügbar'}">
-                <div class="movie-info">
-                    <h3>${item.title || 'Kein Titel verfügbar'}</h3>
-                    <p>${item.overview || 'Keine Beschreibung verfügbar'}</p>
-                    <p>Bewertung: ${item.vote_average ? item.vote_average.toFixed(1) : 'Keine Bewertung'}/10</p>
-                    <p>Erscheinungsdatum: ${item.release_date || 'Kein Datum verfügbar'}</p>
-                    <p>Typ: ${item.mediaType === 'movie' ? 'Film' : 'Serie'}</p>
-                    ${seasonInfo}
-                    <button onclick="addToFavorites(${JSON.stringify(item).replace(/"/g, '&quot;')})">
-                        Zu Favoriten hinzufügen
-                    </button>
-                    <button onclick="closeDetailCard()">Zurück zur Suche</button>
-                </div>
-            </div>
-        `;
-
-        // Füge die Detailansicht in den Container ein (in einem Overlay)
-        document.body.appendChild(detailCardOverlay);
+    } catch (error) {
+        console.error('Fehler beim Laden der Streaming-Informationen:', error);
     }
-
-    // Funktion zum Schließen der Detailkarte
-    function closeDetailCard() {
-        const overlay = document.querySelector('.detail-overlay');
-        if (overlay) {
-            overlay.remove(); // Entfernt die Detailansicht
+ 
+    if (item.mediaType === 'tv') {
+        const seriesDetails = await getSeriesDetails(item.id);
+        if (seriesDetails) {
+            const totalEpisodes = seriesDetails.seasons.reduce((sum, season) => sum + (season.episode_count || 0), 0);
+            seasonInfo = `
+<p>Staffeln: ${seriesDetails.number_of_seasons}</p>
+<p>Folgen insgesamt: ${totalEpisodes}</p>
+            `;
         }
     }
-
+ 
+    const detailCardOverlay = document.createElement('div');
+    detailCardOverlay.className = 'detail-overlay';
+    detailCardOverlay.innerHTML = `
+<div class="movie-card">
+<img src="${item.poster_path
+                ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
+                : './images/no-poster.jpg'}" alt="${item.title || 'Kein Titel verfügbar'}">
+<div class="movie-info">
+<h3>${item.title || 'Kein Titel verfügbar'}</h3>
+<p>${item.overview || 'Keine Beschreibung verfügbar'}</p>
+                ${seasonInfo}${streamingInfo}
+<button onclick="closeDetailCard()">Zurück</button>
+</div>
+</div>
+    `;
+    document.body.appendChild(detailCardOverlay);
+}
+ 
+// Funktion zum Schließen der Detailkarte
+function closeDetailCard() {
+    const overlay = document.querySelector('.detail-overlay');
+    if (overlay) {
+        overlay.remove();
+    }
+}
     // Genre Filter
     document.getElementById('genreFilter').addEventListener('change', (e) => {
         selectedGenre = e.target.value;
