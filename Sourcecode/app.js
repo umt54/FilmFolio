@@ -104,16 +104,25 @@ async function showDetailCard(item, container) {
     let streamingInfo = '';
     
     try {
-        const streamingResponse = await fetch(`https://api.themoviedb.org/3/${item.mediaType}/${item.id}/watch/providers`, options);
+        // Korrigierter API-Aufruf für Streaming-Provider
+        const streamingResponse = await fetch(`https://api.themoviedb.org/3/${item.mediaType}/${item.id}/watch/providers?api_key=${apiKey}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
         const streamingData = await streamingResponse.json();
+        console.log('Streaming Data:', streamingData); // Debug-Ausgabe
         
         if (streamingData.results && streamingData.results.DE) {
             const providers = streamingData.results.DE;
+            console.log('Deutsche Provider:', providers); // Debug-Ausgabe
             
             if (providers.flatrate && providers.flatrate.length > 0) {
                 streamingInfo = `
                     <div class="streaming-info">
-                        <h4>Verfügbar auf:</h4>
+                        <h4>🎬 Streaming-Verfügbarkeit:</h4>
                         <div class="provider-list">
                             ${providers.flatrate.map(provider => `
                                 <div class="provider">
@@ -130,10 +139,22 @@ async function showDetailCard(item, container) {
                         <p class="no-streaming">💔 Dieser Titel ist aktuell bei keinem Streaming-Anbieter verfügbar</p>
                     </div>`;
             }
+        } else {
+            streamingInfo = `
+                <div class="streaming-info">
+                    <p class="no-streaming">💔 Dieser Titel ist aktuell bei keinem Streaming-Anbieter verfügbar</p>
+                </div>`;
         }
     } catch (error) {
         console.error('Fehler beim Laden der Streaming-Informationen:', error);
+        streamingInfo = `
+            <div class="streaming-info">
+                <p class="error-streaming">⚠️ Streaming-Informationen konnten nicht geladen werden</p>
+            </div>`;
     }
+
+    // Extrahiere nur das Jahr aus dem Erscheinungsdatum
+    const releaseYear = item.release_date ? item.release_date.split('-')[0] : 'Kein Datum verfügbar';
 
     const detailCardOverlay = document.createElement('div');
     detailCardOverlay.className = 'detail-overlay';
@@ -142,16 +163,23 @@ async function showDetailCard(item, container) {
             <div class="movie-poster">
                 <img src="${item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : './images/no-poster.jpg'}" 
                      alt="${item.title || 'Kein Titel verfügbar'}">
-                ${streamingInfo}
+                <div class="info-container">
+                    <div class="left-column">
+                        ${streamingInfo}
+                    </div>
+                    <div class="right-column">
+                        <div class="info-grid">
+                            <p>⭐ ${item.vote_average ? item.vote_average.toFixed(1) : 'N/A'}</p>
+                            <p>📅 ${releaseYear}</p>
+                            <p>🎬 ${item.mediaType === 'movie' ? 'Film' : 'Serie'}</p>
+                        </div>
+                        <button onclick="closeDetailCard()" class="close-button">Zurück</button>
+                    </div>
+                </div>
             </div>
             <div class="movie-info">
                 <h3>${item.title || 'Kein Titel verfügbar'}</h3>
                 <p>${item.overview || 'Keine Beschreibung verfügbar'}</p>
-                <p>⭐ Bewertung: ${item.vote_average ? item.vote_average.toFixed(1) : 'Keine Bewertung'}/10</p>
-                <p>📅 Erscheinungsdatum: ${item.release_date || 'Kein Datum verfügbar'}</p>
-                <p>🎬 Typ: ${item.mediaType === 'movie' ? 'Film' : 'Serie'}</p>
-                ${seasonInfo}
-                <button onclick="closeDetailCard()" class="close-button">← Zurück</button>
             </div>
         </div>
     `;
