@@ -104,58 +104,75 @@ async function showDetailCard(item, container) {
     let streamingInfo = '';
     
     try {
-        // Korrigierter API-Aufruf für Streaming-Provider
-        const streamingResponse = await fetch(`https://api.themoviedb.org/3/${item.mediaType}/${item.id}/watch/providers?api_key=${apiKey}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        
+        const streamingResponse = await fetch(`https://api.themoviedb.org/3/${item.mediaType || 'movie'}/${item.id}/watch/providers?api_key=${apiKey}`, options);
         const streamingData = await streamingResponse.json();
-        console.log('Streaming Data:', streamingData); // Debug-Ausgabe
         
         if (streamingData.results && streamingData.results.DE) {
             const providers = streamingData.results.DE;
-            console.log('Deutsche Provider:', providers); // Debug-Ausgabe
-            
             if (providers.flatrate && providers.flatrate.length > 0) {
+                const mainProvider = providers.flatrate[0];
+                const providerUrl = {
+                    'Netflix': 'https://www.netflix.com',
+                    'Amazon Prime Video': 'https://www.amazon.de/prime-video',
+                    'Disney Plus': 'https://www.disneyplus.com',
+                    'Sky': 'https://www.wow.de',
+                    'RTL Plus': 'https://www.rtlplus.de',
+                    'Paramount Plus': 'https://www.paramountplus.com/de',
+                    'Apple TV Plus': 'https://tv.apple.com',
+                    'MUBI': 'https://mubi.com/de',
+                    'WOW': 'https://www.wow.de',
+                    'MagentaTV': 'https://www.telekom.de/magenta-tv',
+                    'Joyn Plus': 'https://www.joyn.de',
+                    'ARD': 'https://www.ardmediathek.de',
+                    'ZDF': 'https://www.zdf.de'
+                }[mainProvider.provider_name] || '#';
+
+                // Anpassen der Provider-Namen für die Anzeige
+                const providerDisplayNames = {
+                    'Netflix': 'Netflix',
+                    'Amazon Prime Video': 'Amazon Prime Video',
+                    'Disney+': 'Disney Plus',
+                    'Sky': 'Sky',
+                    'RTL+': 'RTL Plus',
+                    'Paramount+': 'Paramount Plus',
+                    'Apple TV+': 'Apple TV Plus',
+                    'MUBI': 'MUBI',
+                    'WOW': 'WOW',
+                    'MagentaTV': 'MagentaTV',
+                    'Joyn+': 'Joyn Plus',
+                    'ARD': 'ARD Mediathek',
+                    'ZDF': 'ZDF Mediathek'
+                }[mainProvider.provider_name] || mainProvider.provider_name;
+
                 streamingInfo = `
                     <div class="streaming-info">
-                        <h4>🎬 Streaming-Verfügbarkeit:</h4>
-                        <div class="provider-list">
-                            ${providers.flatrate.map(provider => `
-                                <div class="provider">
-                                    <img src="https://image.tmdb.org/t/p/original${provider.logo_path}" 
-                                         alt="${provider.provider_name}">
-                                    <span class="provider-name">${provider.provider_name}</span>
-                                </div>
-                            `).join('')}
-                        </div>
+                        <h4>🎬 Verfügbar bei:</h4>
+                        <a href="${providerUrl}" target="_blank" class="provider-link">
+                            <div class="provider">
+                                <img src="https://image.tmdb.org/t/p/original${mainProvider.logo_path}" 
+                                     alt="${providerDisplayNames}">
+                                <p class="provider-name">${providerDisplayNames}</p>
+                            </div>
+                        </a>
                     </div>`;
             } else {
                 streamingInfo = `
                     <div class="streaming-info">
-                        <p class="no-streaming">💔 Dieser Titel ist aktuell bei keinem Streaming-Anbieter verfügbar</p>
+                        <p class="no-streaming">💔 Nicht zum Streaming verfügbar</p>
                     </div>`;
             }
-        } else {
-            streamingInfo = `
-                <div class="streaming-info">
-                    <p class="no-streaming">💔 Dieser Titel ist aktuell bei keinem Streaming-Anbieter verfügbar</p>
-                </div>`;
         }
     } catch (error) {
         console.error('Fehler beim Laden der Streaming-Informationen:', error);
         streamingInfo = `
             <div class="streaming-info">
-                <p class="error-streaming">⚠️ Streaming-Informationen konnten nicht geladen werden</p>
+                <p class="error-streaming">⚠️ Streaming-Info nicht verfügbar</p>
             </div>`;
     }
 
-    // Extrahiere nur das Jahr aus dem Erscheinungsdatum
     const releaseYear = item.release_date ? item.release_date.split('-')[0] : 'Kein Datum verfügbar';
 
+    // Erstelle das Overlay
     const detailCardOverlay = document.createElement('div');
     detailCardOverlay.className = 'detail-overlay';
     detailCardOverlay.innerHTML = `
@@ -173,7 +190,7 @@ async function showDetailCard(item, container) {
                             <p>📅 ${releaseYear}</p>
                             <p>🎬 ${item.mediaType === 'movie' ? 'Film' : 'Serie'}</p>
                         </div>
-                        <button onclick="closeDetailCard()" class="close-button">Zurück</button>
+                        <button class="close-button">Zurück</button>
                     </div>
                 </div>
             </div>
@@ -183,127 +200,250 @@ async function showDetailCard(item, container) {
             </div>
         </div>
     `;
+
+    // Füge das Overlay zum Body hinzu
     document.body.appendChild(detailCardOverlay);
-}
- 
-// Funktion zum Schließen der Detailkarte
-function closeDetailCard() {
-    const overlay = document.querySelector('.detail-overlay');
-    if (overlay) {
-        overlay.remove();
-    }
-}
-    // Genre Filter
-    document.getElementById('genreFilter').addEventListener('change', (e) => {
-        selectedGenre = e.target.value;
+
+    // Event Listener für den Schließen-Button
+    detailCardOverlay.querySelector('.close-button').addEventListener('click', () => {
+        detailCardOverlay.remove();
     });
 
-    // Lade Genres
-    async function loadGenres() {
-        try {
-            const [movieGenres, tvGenres] = await Promise.all([
-                fetch(`https://api.themoviedb.org/3/genre/movie/list?api_key=${apiKey}&language=de`, options),
-                fetch(`https://api.themoviedb.org/3/genre/tv/list?api_key=${apiKey}&language=de`, options)
-            ]);
+    // Füge den Favoriten-Button hinzu
+    const favoriteButton = document.createElement('button');
+    favoriteButton.className = 'favorite-button';
+    favoriteButton.innerHTML = '<i class="fas fa-heart"></i>';
 
-            const movieData = await movieGenres.json();
-            const tvData = await tvGenres.json();
-
-            const allGenres = [...new Map([...movieData.genres, ...tvData.genres]
-                .map(item => [item.id, item])).values()];
-
-            const genreSelect = document.getElementById('genreFilter');
-            genreSelect.innerHTML = '<option value="">Genre auswählen</option>';
-            allGenres.forEach(genre => {
-                genreSelect.innerHTML += `<option value="${genre.id}">${genre.name}</option>`;
-            });
-        } catch (error) {
-            console.error('Fehler beim Laden der Genres:', error);
+    // Prüfe ob bereits favorisiert
+    const auth = getAuth();
+    if (auth.currentUser) {
+        const db = getFirestore();
+        const favoriteRef = doc(db, 'favorites', auth.currentUser.uid, 'titles', item.id.toString());
+        const docSnap = await getDoc(favoriteRef);
+        if (docSnap.exists()) {
+            favoriteButton.classList.add('active');
         }
     }
 
-    // Initialisierung
-    window.onload = loadGenres;
-
-    document.getElementById('randomMovie').textContent = 'Zufälliger Titel';
-
-    // Funktion für zufälligen Titel
-    function randomTitle() {
-        if (allResults.length === 0) {
-            console.error('Keine Ergebnisse für Zufallstitel verfügbar.');
+    // Event Listener für den Favoriten-Button
+    favoriteButton.addEventListener('click', async () => {
+        const auth = getAuth();
+        if (!auth.currentUser) {
+            alert('Bitte melde dich an, um Favoriten zu speichern');
             return;
         }
-        const randomIndex = Math.floor(Math.random() * allResults.length);
-        const randomItem = allResults[randomIndex];
-        showDetailCard(randomItem, document.getElementById('movieResults'));
-    }
 
-    // Event Listener für den "Mehr anzeigen"-Button
-    document.getElementById('loadMoreButton').addEventListener('click', loadTopMovies);
+        const db = getFirestore();
+        const favoriteRef = doc(db, 'favorites', auth.currentUser.uid, 'titles', item.id.toString());
+        const docSnap = await getDoc(favoriteRef);
 
-    // Funktion zum Laden der Top-Filme/Serien und Hinzufügen zur bestehenden Liste
-    async function loadTopMovies() {
         try {
-            const response = await fetch(`https://api.themoviedb.org/3/movie/top_rated?api_key=${apiKey}&language=de&page=${currentPage}`, options);
-            const data = await response.json();
-
-            const movieResults = document.getElementById('movieResults');
-
-            // Wenn keine neuen Filme gefunden werden
-            if (!data.results || data.results.length === 0) {
-                movieResults.innerHTML += '<p>Keine weiteren Ergebnisse</p>';
-                return;
-            }
-
-            // Füge die neuen Ergebnisse zu den bereits angezeigten Ergebnissen hinzu
-            allResults = [...allResults, ...data.results];
-
-            // Sortiere alle Ergebnisse nach Bewertung (absteigend)
-            allResults.sort((a, b) => b.vote_average - a.vote_average);
-
-            // Leere den Container und füge die sortierten Ergebnisse hinzu
-            movieResults.innerHTML = '';
-
-            // Erstelle Grid-Container für die Vorschaukarten
-            const gridContainer = document.createElement('div');
-            gridContainer.className = 'preview-grid';
-            movieResults.appendChild(gridContainer);
-            
-            allResults.forEach(item => {
-                // Erstelle Vorschaukarte
-                const previewCard = document.createElement('div');
-                previewCard.className = 'preview-card';
-                previewCard.innerHTML = `
-                    <img src="${item.poster_path 
-                        ? `https://image.tmdb.org/t/p/w500${item.poster_path}` 
-                        : './images/no-poster.jpg'}" 
-                        alt="${item.title || 'Kein Titel verfügbar'}"
-                    >
-                    <h3>${item.title || 'Kein Titel verfügbar'}</h3>
-                    <p class="rating">⭐ ${item.vote_average ? item.vote_average.toFixed(1) : 'N/A'}/10</p>
-                `;
-
-                // Click Event für die Vorschaukarte
-                previewCard.addEventListener('click', () => {
-                    showDetailCard(item, movieResults);
+            if (docSnap.exists()) {
+                await deleteDoc(favoriteRef);
+                favoriteButton.classList.remove('active');
+            } else {
+                await setDoc(favoriteRef, {
+                    id: item.id,
+                    title: item.title,
+                    poster_path: item.poster_path,
+                    overview: item.overview,
+                    vote_average: item.vote_average,
+                    release_date: item.release_date,
+                    media_type: item.mediaType || 'movie',
+                    added_at: new Date().toISOString()
                 });
+                favoriteButton.classList.add('active');
+            }
+        } catch (error) {
+            console.error('Fehler beim Verarbeiten des Favoriten:', error);
+            alert('Ein Fehler ist aufgetreten');
+        }
+    });
 
-                gridContainer.appendChild(previewCard);
+    // Füge den Favoriten-Button zur movie-info hinzu
+    detailCardOverlay.querySelector('.movie-info').appendChild(favoriteButton);
+}
+ 
+// Genre Filter
+document.getElementById('genreFilter').addEventListener('change', (e) => {
+    selectedGenre = e.target.value;
+});
+
+// Lade Genres
+async function loadGenres() {
+    try {
+        const [movieGenres, tvGenres] = await Promise.all([
+            fetch(`https://api.themoviedb.org/3/genre/movie/list?api_key=${apiKey}&language=de`, options),
+            fetch(`https://api.themoviedb.org/3/genre/tv/list?api_key=${apiKey}&language=de`, options)
+        ]);
+
+        const movieData = await movieGenres.json();
+        const tvData = await tvGenres.json();
+
+        const allGenres = [...new Map([...movieData.genres, ...tvData.genres]
+            .map(item => [item.id, item])).values()];
+
+        const genreSelect = document.getElementById('genreFilter');
+        genreSelect.innerHTML = '<option value="">Genre auswählen</option>';
+        allGenres.forEach(genre => {
+            genreSelect.innerHTML += `<option value="${genre.id}">${genre.name}</option>`;
+        });
+    } catch (error) {
+        console.error('Fehler beim Laden der Genres:', error);
+    }
+}
+
+// Initialisierung
+window.onload = loadGenres;
+
+document.getElementById('randomMovie').textContent = 'Zufälliger Titel';
+
+// Funktion für zufälligen Titel
+function randomTitle() {
+    if (allResults.length === 0) {
+        console.error('Keine Ergebnisse für Zufallstitel verfügbar.');
+        return;
+    }
+    const randomIndex = Math.floor(Math.random() * allResults.length);
+    const randomItem = allResults[randomIndex];
+    showDetailCard(randomItem, document.getElementById('movieResults'));
+}
+
+// Event Listener für den "Mehr anzeigen"-Button
+document.getElementById('loadMoreButton').addEventListener('click', loadTopMovies);
+
+// Funktion zum Laden der Top-Filme/Serien und Hinzufügen zur bestehenden Liste
+async function loadTopMovies() {
+    try {
+        const response = await fetch(`https://api.themoviedb.org/3/movie/top_rated?api_key=${apiKey}&language=de&page=${currentPage}`, options);
+        const data = await response.json();
+
+        const movieResults = document.getElementById('movieResults');
+
+        // Wenn keine neuen Filme gefunden werden
+        if (!data.results || data.results.length === 0) {
+            movieResults.innerHTML += '<p>Keine weiteren Ergebnisse</p>';
+            return;
+        }
+
+        // Füge die neuen Ergebnisse zu den bereits angezeigten Ergebnissen hinzu
+        allResults = [...allResults, ...data.results];
+
+        // Sortiere alle Ergebnisse nach Bewertung (absteigend)
+        allResults.sort((a, b) => b.vote_average - a.vote_average);
+
+        // Leere den Container und füge die sortierten Ergebnisse hinzu
+        movieResults.innerHTML = '';
+
+        // Erstelle Grid-Container für die Vorschaukarten
+        const gridContainer = document.createElement('div');
+        gridContainer.className = 'preview-grid';
+        movieResults.appendChild(gridContainer);
+        
+        allResults.forEach(item => {
+            // Erstelle Vorschaukarte
+            const previewCard = document.createElement('div');
+            previewCard.className = 'preview-card';
+            previewCard.innerHTML = `
+                <img src="${item.poster_path 
+                    ? `https://image.tmdb.org/t/p/w500${item.poster_path}` 
+                    : './images/no-poster.jpg'}" 
+                    alt="${item.title || 'Kein Titel verfügbar'}"
+                >
+                <h3>${item.title || 'Kein Titel verfügbar'}</h3>
+                <p class="rating">⭐ ${item.vote_average ? item.vote_average.toFixed(1) : 'N/A'}/10</p>
+            `;
+
+            // Click Event für die Vorschaukarte
+            previewCard.addEventListener('click', () => {
+                showDetailCard(item, movieResults);
             });
 
-            currentPage++; // Erhöhe die Seite für die nächste Anfrage
-        } catch (error) {
-            console.error('Fehler beim Laden der Top-Filme:', error);
+            gridContainer.appendChild(previewCard);
+        });
+
+        currentPage++; // Erhöhe die Seite für die nächste Anfrage
+    } catch (error) {
+        console.error('Fehler beim Laden der Top-Filme:', error);
+    }
+}
+
+// Initialisiere das Laden der Top-Filme
+loadTopMovies();
+
+function toggleDropdown() {
+    const dropdown = document.getElementById('dropdown');
+    dropdown.classList.toggle('show'); // Toggle die Sichtbarkeit des Dropdowns
+}
+
+async function loadFavorites() {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    const favoritesSection = document.getElementById('favorites');
+    
+    if (!user) {
+        favoritesSection.innerHTML = '<p class="no-favorites">Bitte melde dich an, um deine Favoriten zu sehen.</p>';
+        return;
+    }
+
+    try {
+        const db = getFirestore();
+        const favoritesRef = collection(db, 'favorites', user.uid, 'titles');
+        const q = query(favoritesRef);
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+            favoritesSection.innerHTML = '<p class="no-favorites">Keine Favoriten vorhanden</p>';
+            return;
         }
+
+        favoritesSection.innerHTML = '<h2>Meine Favoriten</h2>';
+        const gridContainer = document.createElement('div');
+        gridContainer.className = 'preview-grid';
+        
+        querySnapshot.forEach((doc) => {
+            const item = doc.data();
+            const previewCard = document.createElement('div');
+            previewCard.className = 'preview-card';
+            previewCard.innerHTML = `
+                <img src="${item.poster_path 
+                    ? `https://image.tmdb.org/t/p/w500${item.poster_path}` 
+                    : './images/no-poster.jpg'}" 
+                    alt="${item.title}">
+                <h3>${item.title}</h3>
+                <p class="rating">⭐ ${item.vote_average ? item.vote_average.toFixed(1) : 'N/A'}/10</p>
+            `;
+            
+            previewCard.addEventListener('click', () => {
+                showDetailCard(item);
+            });
+            
+            gridContainer.appendChild(previewCard);
+        });
+        
+        favoritesSection.appendChild(gridContainer);
+    } catch (error) {
+        console.error('Fehler beim Laden der Favoriten:', error);
+        favoritesSection.innerHTML = '<p class="error-message">Fehler beim Laden der Favoriten</p>';
     }
+}
 
-    // Initialisiere das Laden der Top-Filme
-    loadTopMovies();
+document.getElementById('favoritesLink').addEventListener('click', (e) => {
+    e.preventDefault();
+    if (e.target.classList.contains('disabled')) return;
+    
+    const movieResults = document.getElementById('movieResults');
+    const topMovies = document.getElementById('topMovies');
+    const favorites = document.getElementById('favorites');
+    const loadMoreButton = document.getElementById('loadMoreButton');
+    
+    movieResults.style.display = 'none';
+    topMovies.style.display = 'none';
+    favorites.style.display = 'block';
+    loadMoreButton.style.display = 'none';
+    
+    loadFavorites();
+});
 
-    function toggleDropdown() {
-        const dropdown = document.getElementById('dropdown');
-        dropdown.classList.toggle('show'); // Toggle die Sichtbarkeit des Dropdowns
-    }
-
-
+window.closeDetailCard = closeDetailCard;
     

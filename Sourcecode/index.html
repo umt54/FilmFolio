@@ -13,7 +13,7 @@
         // Importiere die benötigten Funktionen aus den SDKs
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, query, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import firebaseConfig from './firebase-config.js';
 
         // Firebase initialisieren
@@ -47,24 +47,27 @@
         onAuthStateChanged(auth, async (user) => {
             const loginLink = document.getElementById('loginLink');
             const logoutLink = document.getElementById('logoutLink');
+            const favoritesLink = document.getElementById('favoritesLink');
             
             if (user) {
-                // Benutzer ist angemeldet
                 loginLink.classList.add('disabled');
                 logoutLink.classList.remove('disabled');
+                favoritesLink.classList.remove('disabled');
                 loginLink.href = '#';
                 logoutLink.href = '#';
+                favoritesLink.href = '#';
                 
                 // Theme aus Firebase laden
                 const docSnap = await getDoc(doc(db, 'users', user.uid));
                 const userTheme = docSnap.exists() ? docSnap.data().theme : localStorage.getItem('theme');
                 setTheme(userTheme === 'dark');
             } else {
-                // Benutzer ist nicht angemeldet
                 loginLink.classList.remove('disabled');
                 logoutLink.classList.add('disabled');
+                favoritesLink.classList.add('disabled');
                 loginLink.href = 'login.html';
                 logoutLink.href = '#';
+                favoritesLink.href = '#';
                 
                 // Theme aus localStorage laden
                 const savedTheme = localStorage.getItem('theme') || 'light';
@@ -121,6 +124,7 @@
         </div>
         <div class="dropdown" id="dropdown">
             <a href="login.html" id="loginLink">Anmelden</a>
+            <a href="#" id="favoritesLink" class="disabled">Favoriten</a>
             <a href="#" id="logoutLink" class="disabled">Abmelden</a>
         </div>
     </header>
@@ -149,8 +153,7 @@
             <button id="loadMoreButton" class="load-more-button">Mehr anzeigen</button>
         </div>
         <section id="favorites" class="favorites-section">
-            <h2>Meine Favoriten</h2>
-            <div id="favoritesList"></div>
+            <!-- Hier wird die Favoriten-Sektion eingefügt -->
         </section>
         <div id="detailContainer" class="detail-container">
             <!-- Hier wird die Detailansicht eingefügt -->
