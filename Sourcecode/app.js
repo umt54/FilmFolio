@@ -195,6 +195,9 @@ async function showDetailCard(item, container) {
                 </div>
             </div>
             <div class="movie-info">
+                <button class="favorite-button">
+                    <i class="fas fa-heart"></i>
+                </button>
                 <h3>${item.title || 'Kein Titel verfügbar'}</h3>
                 <p>${item.overview || 'Keine Beschreibung verfügbar'}</p>
             </div>
@@ -210,58 +213,46 @@ async function showDetailCard(item, container) {
     });
 
     // Füge den Favoriten-Button hinzu
-    const favoriteButton = document.createElement('button');
-    favoriteButton.className = 'favorite-button';
-    favoriteButton.innerHTML = '<i class="fas fa-heart"></i>';
-
-    // Prüfe ob bereits favorisiert
     const auth = getAuth();
-    if (auth.currentUser) {
+    const isLoggedIn = auth.currentUser !== null;
+
+    // Erstelle den Favoriten-Button
+    const favoriteButton = detailCardOverlay.querySelector('.favorite-button');
+    favoriteButton.style.display = isLoggedIn ? 'block' : 'none';
+
+    if (isLoggedIn) {
         const db = getFirestore();
         const favoriteRef = doc(db, 'favorites', auth.currentUser.uid, 'titles', item.id.toString());
         const docSnap = await getDoc(favoriteRef);
+        
         if (docSnap.exists()) {
             favoriteButton.classList.add('active');
         }
-    }
 
-    // Event Listener für den Favoriten-Button
-    favoriteButton.addEventListener('click', async () => {
-        const auth = getAuth();
-        if (!auth.currentUser) {
-            alert('Bitte melde dich an, um Favoriten zu speichern');
-            return;
-        }
-
-        const db = getFirestore();
-        const favoriteRef = doc(db, 'favorites', auth.currentUser.uid, 'titles', item.id.toString());
-        const docSnap = await getDoc(favoriteRef);
-
-        try {
-            if (docSnap.exists()) {
-                await deleteDoc(favoriteRef);
-                favoriteButton.classList.remove('active');
-            } else {
-                await setDoc(favoriteRef, {
-                    id: item.id,
-                    title: item.title,
-                    poster_path: item.poster_path,
-                    overview: item.overview,
-                    vote_average: item.vote_average,
-                    release_date: item.release_date,
-                    media_type: item.mediaType || 'movie',
-                    added_at: new Date().toISOString()
-                });
-                favoriteButton.classList.add('active');
+        favoriteButton.addEventListener('click', async () => {
+            try {
+                if (docSnap.exists()) {
+                    await deleteDoc(favoriteRef);
+                    favoriteButton.classList.remove('active');
+                } else {
+                    await setDoc(favoriteRef, {
+                        id: item.id,
+                        title: item.title,
+                        poster_path: item.poster_path,
+                        overview: item.overview,
+                        vote_average: item.vote_average,
+                        release_date: item.release_date,
+                        media_type: item.mediaType || 'movie',
+                        added_at: new Date().toISOString()
+                    });
+                    favoriteButton.classList.add('active');
+                }
+            } catch (error) {
+                console.error('Fehler beim Verarbeiten des Favoriten:', error);
+                alert('Ein Fehler ist aufgetreten');
             }
-        } catch (error) {
-            console.error('Fehler beim Verarbeiten des Favoriten:', error);
-            alert('Ein Fehler ist aufgetreten');
-        }
-    });
-
-    // Füge den Favoriten-Button zur movie-info hinzu
-    detailCardOverlay.querySelector('.movie-info').appendChild(favoriteButton);
+        });
+    }
 }
  
 // Genre Filter
@@ -378,26 +369,23 @@ function toggleDropdown() {
 
 async function loadFavorites() {
     const auth = getAuth();
-    const user = auth.currentUser;
     const favoritesSection = document.getElementById('favorites');
     
-    if (!user) {
+    if (!auth.currentUser) {
         favoritesSection.innerHTML = '<p class="no-favorites">Bitte melde dich an, um deine Favoriten zu sehen.</p>';
         return;
     }
 
     try {
         const db = getFirestore();
-        const favoritesRef = collection(db, 'favorites', user.uid, 'titles');
-        const q = query(favoritesRef);
-        const querySnapshot = await getDocs(q);
-
+        const favoritesRef = collection(db, 'favorites', auth.currentUser.uid, 'titles');
+        const querySnapshot = await getDocs(favoritesRef);
+        
         if (querySnapshot.empty) {
             favoritesSection.innerHTML = '<p class="no-favorites">Keine Favoriten vorhanden</p>';
             return;
         }
 
-        favoritesSection.innerHTML = '<h2>Meine Favoriten</h2>';
         const gridContainer = document.createElement('div');
         gridContainer.className = 'preview-grid';
         
@@ -406,25 +394,24 @@ async function loadFavorites() {
             const previewCard = document.createElement('div');
             previewCard.className = 'preview-card';
             previewCard.innerHTML = `
-                <img src="${item.poster_path 
-                    ? `https://image.tmdb.org/t/p/w500${item.poster_path}` 
-                    : './images/no-poster.jpg'}" 
-                    alt="${item.title}">
-                <h3>${item.title}</h3>
+                <img src="${item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : './images/no-poster.jpg'}" 
+                     alt="${item.title || 'Kein Titel verfügbar'}">
+                <h3>${item.title || 'Kein Titel verfügbar'}</h3>
                 <p class="rating">⭐ ${item.vote_average ? item.vote_average.toFixed(1) : 'N/A'}/10</p>
             `;
             
             previewCard.addEventListener('click', () => {
-                showDetailCard(item);
+                showDetailCard(item, favoritesSection);
             });
             
             gridContainer.appendChild(previewCard);
         });
-        
+
+        favoritesSection.innerHTML = '<h2>Meine Favoriten</h2>';
         favoritesSection.appendChild(gridContainer);
     } catch (error) {
         console.error('Fehler beim Laden der Favoriten:', error);
-        favoritesSection.innerHTML = '<p class="error-message">Fehler beim Laden der Favoriten</p>';
+        favoritesSection.innerHTML = '<p class="error">Fehler beim Laden der Favoriten</p>';
     }
 }
 

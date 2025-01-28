@@ -287,6 +287,7 @@ header {
     overflow-y: auto;
     max-height: 500px;
     position: relative;
+    padding-bottom: 60px;
 }
 
 .movie-info h3 {
@@ -1156,41 +1157,47 @@ input::placeholder {
 
 .favorite-button {
     position: absolute;
-    top: 20px;
+    bottom: 20px;
     right: 20px;
-    background: rgba(0, 0, 0, 0.7);
+    background: transparent;
     border: none;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
+    font-size: 1.8rem;
     cursor: pointer;
+    color: #e74c3c;
+    padding: 10px;
+    z-index: 1000;
     transition: all 0.3s ease;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
-}
-
-.favorite-button i {
-    color: white;
-    font-size: 1.2rem;
-}
-
-.favorite-button.active i {
-    color: #ff4757;
 }
 
 .favorite-button:hover {
     transform: scale(1.1);
-    background: rgba(0, 0, 0, 0.8);
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
-[data-theme="dark"] .streaming-info {
-    background: rgba(255, 255, 255, 0.1);
+.favorite-button.active {
+    color: #e74c3c;
 }
 
-[data-theme="dark"] .provider-name,
-[data-theme="dark"] .no-streaming,
-[data-theme="dark"] .error-streaming {
-    color: rgba(255, 255, 255, 0.9);
+.favorite-button:not(.active) {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+[data-theme="dark"] .favorite-button {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .favorite-button:hover {
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+.movie-info {
+    position: relative;
+    padding-bottom: 60px;
 }
