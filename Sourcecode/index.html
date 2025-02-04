@@ -26,6 +26,8 @@
         const icon = themeToggle.querySelector('i');
 
         // Theme-Management-Funktionen
+
+        
         async function setTheme(isDark) {
             document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
             icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
@@ -137,8 +139,12 @@
             </select>
             <button id="randomMovie" onclick="randomTitle()">Zufälliger Titel</button>
         </div>
-        <input type="text" id="searchInput" placeholder="Titel suchen..." class="search-input">
+        <input type="text" id="searchInput" class="search-input" placeholder="Suche nach Filmen und Serien...">
         <button id="searchButton">Suchen</button>
+        <button id="top100SeriesButton">
+            <i class="fas fa-trophy"></i>
+            Top 100 Serien
+        </button>
     </div>
 
     <main>

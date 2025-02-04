@@ -6,6 +6,14 @@ const options = {
         Authorization: `Bearer ${apiKey}`
     }
 };
+
+// Funktion zum Schließen der Detailansicht
+function closeDetailCard() {
+    const overlay = document.querySelector('.detail-overlay');
+    if (overlay) {
+        overlay.remove();
+    }
+}
  
 let selectedGenre = '';
 let currentPage = 1; // Aktuelle Seite für die Pagination
@@ -13,7 +21,7 @@ const itemsPerPage = 10; // Anzahl der Elemente pro Seite
 let allResults = []; // Alle bisher geladenen Ergebnisse
 let favorites = []; // Favoriten-Array
  
-// Suchfunktion
+// Event Listener für die Suchfunktion
 document.getElementById('searchButton').addEventListener('click', performSearch);
 document.getElementById('searchInput').addEventListener('keyup', (e) => {
     if (e.key === 'Enter') {
@@ -67,11 +75,11 @@ async function performSearch() {
             const previewCard = document.createElement('div');
             previewCard.className = 'preview-card';
             previewCard.innerHTML = `
-<img src="${item.poster_path
+                <img src="${item.poster_path
                     ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
                     : './images/no-poster.jpg'}" alt="${item.title || 'Kein Titel verfügbar'}">
-<h3>${item.title || 'Kein Titel verfügbar'}</h3>
-<p class="rating">⭐ ${item.vote_average ? item.vote_average.toFixed(1) : 'N/A'}/10</p>
+                <h3>${item.title || 'Kein Titel verfügbar'}</h3>
+                <p class="rating">⭐ ${item.vote_average ? item.vote_average.toFixed(1) : 'N/A'}/10</p>
             `;
  
             previewCard.addEventListener('click', () => {
@@ -433,4 +441,98 @@ document.getElementById('favoritesLink').addEventListener('click', (e) => {
 });
 
 window.closeDetailCard = closeDetailCard;
+
+// Event Listener für den Top 100 Serien Button
+document.getElementById('top100SeriesButton').addEventListener('click', async function() {
+    try {
+        const movieResults = document.getElementById('movieResults');
+        const topMovies = document.getElementById('topMovies');
+        const favorites = document.getElementById('favorites');
+        const loadMoreButton = document.getElementById('loadMoreButton');
+
+        // Verstecke andere Sektionen
+        topMovies.style.display = 'none';
+        favorites.style.display = 'none';
+        loadMoreButton.style.display = 'none';
+        movieResults.style.display = 'block';
+
+        movieResults.innerHTML = '<div class="loading">Lade Top 100 Serien...</div>';
+        
+        // Sammle die ersten 5 Seiten (da jede Seite 20 Ergebnisse enthält)
+        const pages = await Promise.all([1, 2, 3, 4, 5].map(page => 
+            fetch(`https://api.themoviedb.org/3/tv/top_rated?api_key=${apiKey}&language=de&page=${page}`, options)
+            .then(response => response.json())
+        ));
+
+        // Kombiniere alle Ergebnisse
+        allResults = pages.flatMap(page => page.results.map(show => ({
+            ...show,
+            mediaType: 'tv',
+            title: show.name,
+            release_date: show.first_air_date,
+            overview: show.overview || 'Keine Beschreibung verfügbar'
+        })));
+
+        // Sortiere nach Bewertung
+        allResults.sort((a, b) => b.vote_average - a.vote_average);
+
+        // Nimm nur die Top 100
+        allResults = allResults.slice(0, 100);
+
+        // Erstelle Header-Bereich
+        movieResults.innerHTML = `
+            <div class="top100-header">
+                <h2>Die 100 bestbewerteten Serien</h2>
+                <p class="top100-info">Basierend auf Bewertungen von TMDb-Nutzern</p>
+            </div>
+        `;
+        
+        // Erstelle Grid-Container für die Vorschaukarten
+        const gridContainer = document.createElement('div');
+        gridContainer.className = 'preview-grid';
+        movieResults.appendChild(gridContainer);
+
+        allResults.forEach((item, index) => {
+            const previewCard = document.createElement('div');
+            previewCard.className = 'preview-card';
+            
+            // Berechne die durchschnittliche Anzahl der Stimmen
+            const voteCount = item.vote_count ? item.vote_count.toLocaleString() : '0';
+            
+            previewCard.innerHTML = `
+                <div class="rank-badge">#${index + 1}</div>
+                <img src="${item.poster_path 
+                    ? `https://image.tmdb.org/t/p/w500${item.poster_path}` 
+                    : './images/no-poster.jpg'}" 
+                    alt="${item.title || 'Kein Titel verfügbar'}"
+                >
+                <div class="card-content">
+                    <h3>${item.title || 'Kein Titel verfügbar'}</h3>
+                    <div class="rating-info">
+                        <p class="rating">⭐ ${item.vote_average ? item.vote_average.toFixed(1) : 'N/A'}/10</p>
+                        <p class="vote-count">${voteCount} Bewertungen</p>
+                    </div>
+                    <p class="release-year">${item.release_date ? new Date(item.release_date).getFullYear() : 'N/A'}</p>
+                </div>
+            `;
+
+            previewCard.addEventListener('click', () => {
+                // Verwende die gleiche showDetailCard Funktion wie für normale Suchen
+                showDetailCard({
+                    ...item,
+                    mediaType: 'tv',
+                    title: item.title,
+                    release_date: item.release_date,
+                    overview: item.overview
+                }, movieResults);
+            });
+
+            gridContainer.appendChild(previewCard);
+        });
+
+    } catch (error) {
+        console.error('Fehler beim Laden der Top 100 Serien:', error);
+        movieResults.innerHTML = '<p class="error-message">Ein Fehler ist beim Laden der Top 100 Serien aufgetreten</p>';
+    }
+});
     
