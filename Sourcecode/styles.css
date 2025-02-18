@@ -92,7 +92,7 @@ header {
     background-color: #4e9fe2;
 }
  
-#top100SeriesButton {
+#top100SeriesButton, #top100MoviesButton {
     padding: 0.5rem 1rem;
     background-color: #4facfe;
     color: white;
@@ -105,11 +105,11 @@ header {
     gap: 5px;
 }
 
-#top100SeriesButton i {
+#top100SeriesButton i, #top100MoviesButton i {
     font-size: 1.1rem;
 }
 
-#top100SeriesButton:hover {
+#top100SeriesButton:hover, #top100MoviesButton:hover {
     background-color: #4e9fe2;
     transform: translateY(-2px);
 }
@@ -1181,17 +1181,29 @@ input::placeholder {
     font-size: 0.9rem;
 }
 
+.preview-card .rating {
+    color: var(--rating-color);
+    font-weight: 600;
+}
+
+.preview-card .popularity {
+    color: var(--text-color);
+    opacity: 0.8;
+    font-size: 0.85rem;
+}
+
 .preview-card .vote-count {
     color: var(--text-color);
     opacity: 0.7;
     font-size: 0.8rem;
+    text-align: center;
+    margin-top: 5px;
 }
 
-.preview-card .release-year {
-    color: var(--text-color);
-    opacity: 0.8;
-    font-size: 0.9rem;
-    text-align: center;
+/* Dark Mode Anpassungen */
+[data-theme="dark"] .preview-card .popularity,
+[data-theme="dark"] .preview-card .vote-count {
+    opacity: 0.6;
 }
 
 @media (max-width: 768px) {
