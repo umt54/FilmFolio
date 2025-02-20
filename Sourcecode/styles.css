@@ -1344,94 +1344,52 @@ input::placeholder {
 
 /* Navbar Styling */
 .navbar {
+    background-color: #fff; /* Hintergrundfarbe */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Schatten */
+    padding: 10px 20px; /* Innenabstand */
+}
+
+.navbar .container {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 2rem;
-    background: var(--header-bg);
-    box-shadow: 0 2px 4px var(--shadow-color);
+    justify-content: space-between; /* Abstand zwischen Logo und Menü */
+    align-items: center; /* Vertikale Ausrichtung */
 }
 
-.nav-center {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-grow: 1;
-    justify-content: center;
-    margin: 0 2rem;
+.navbar-brand {
+    font-size: 1.5rem; /* Schriftgröße für das Logo */
+    color: var(--heading-color); /* Farbe für das Logo */
+    text-decoration: none; /* Unterstreichung entfernen */
 }
 
-.nav-right {
-    display: flex;
-    align-items: center;
+.navbar-menu {
+    list-style: none; /* Aufzählungszeichen entfernen */
+    display: flex; /* Flexbox für horizontale Anordnung */
+    gap: 20px; /* Abstand zwischen den Menüelementen */
 }
 
-.search-container {
-    flex-grow: 1;
-    max-width: 400px;
+.navbar-menu li a {
+    text-decoration: none; /* Unterstreichung entfernen */
+    color: var(--text-color); /* Textfarbe */
+    font-weight: 500; /* Schriftgewicht */
+    transition: color 0.3s; /* Übergangseffekt für Hover */
 }
 
-#searchInput {
-    width: 100%;
-    padding: 0.5rem 1rem;
-    border: 2px solid var(--border-color);
-    border-radius: 20px;
-    background: var(--input-bg);
-    color: var(--text-color);
+.navbar-menu li a:hover {
+    color: var(--hover-color); /* Farbe beim Hover */
 }
 
-.nav-button {
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 20px;
-    background: var(--primary-color);
-    color: white;
-    cursor: pointer;
-    transition: background-color 0.3s;
+.navbar a {
+    font-size: 1.5rem; /* Größe anpassen, um der Login-Seite zu entsprechen */
+    color: var(--text-color); /* Stelle sicher, dass die Farbe konsistent ist */
+    text-decoration: none; /* Unterstreichung entfernen */
 }
 
-.nav-button:hover {
-    background: var(--primary-color-dark);
+.navbar a:hover {
+    text-decoration: underline; /* Unterstreichung beim Hover */
 }
 
-/* Dropdown Styling */
-.dropdown {
-    position: relative;
-    display: inline-block;
-}
-
-.hamburger-menu {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    color: var(--text-color);
-    cursor: pointer;
-    padding: 0.5rem;
-}
-
-.dropdown-content {
-    display: none;
-    position: absolute;
-    right: 0;
-    background-color: var(--card-bg);
-    min-width: 160px;
-    box-shadow: 0 8px 16px var(--shadow-color);
-    z-index: 1;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.dropdown-content a {
-    color: var(--text-color);
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
-}
-
-.dropdown-content a:hover {
-    background-color: var(--hover-color);
-}
-
-.dropdown:hover .dropdown-content {
-    display: block;
+footer p {
+    font-size: 1.5rem; /* Größe anpassen, um der Login-Seite zu entsprechen */
+    color: var(--text-color); /* Stelle sicher, dass die Farbe konsistent ist */
+    margin: 0; /* Entferne den Standard-Margin */
 }
