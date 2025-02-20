@@ -63,6 +63,9 @@
                 const docSnap = await getDoc(doc(db, 'users', user.uid));
                 const userTheme = docSnap.exists() ? docSnap.data().theme : localStorage.getItem('theme');
                 setTheme(userTheme === 'dark');
+                
+                // Lade Favoriten wenn User eingeloggt ist
+                loadFavorites();
             } else {
                 loginLink.classList.remove('disabled');
                 logoutLink.classList.add('disabled');
@@ -119,54 +122,49 @@
     </script>
 </head>
 <body>
-    <header>
-        <div class="logo" onclick="window.location.href='index.html';" style="cursor: pointer;">FilmFolio</div>
-        <div class="hamburger" id="hamburger" onclick="toggleDropdown()">
-            &#9776;
-        </div>
-        <div class="dropdown" id="dropdown">
-            <a href="login.html" id="loginLink">Anmelden</a>
-            <a href="#" id="favoritesLink" class="disabled">Favoriten</a>
-            <a href="#" id="logoutLink" class="disabled">Abmelden</a>
+    <header style="padding: 0.5rem;">
+        <div class="logo" onclick="window.location.href='index.html';" style="cursor: pointer; margin: 0; font-size: 1.5rem;">FILMFOLIO</div>
+        <div style="flex: 1;"></div>
+        <div style="position: relative;">
+            <div class="hamburger" id="hamburger" onclick="toggleDropdown()" style="margin: 0; font-size: 1.5rem;">
+                &#9776;
+            </div>
+            <div class="dropdown" id="dropdown" style="top: 100%; right: 0;">
+                <a href="login.html" id="loginLink">Anmelden</a>
+                <a href="#" id="favoritesLink" class="disabled">Favoriten</a>
+                <a href="#" id="logoutLink" class="disabled">Abmelden</a>
+            </div>
         </div>
     </header>
 
-    <div class="search-container">
-        <div class="left-buttons">
-            <select id="genreFilter">
+    <div class="search-container" style="margin: 0.5rem auto;">
+        <div class="left-buttons" style="display: flex; gap: 0.5rem;">
+            <select id="genreFilter" style="background-color: #333; color: white; border: none;">
                 <option value="">Genre auswählen</option>
-                <!-- Genres werden per JavaScript hinzugefügt -->
             </select>
-            <button id="randomMovie" onclick="randomTitle()">Zufälliger Titel</button>
+            <button id="randomMovieButton">Zufälligen Titel anzeigen</button>
+            <button id="top100MoviesButton" style="background-color: #4facfe;">
+                <i class="fas fa-film"></i>
+                Top 100 Filme
+            </button>
+            <button id="top100SeriesButton" style="background-color: #4facfe;">
+                <i class="fas fa-trophy"></i>
+                Top 100 Serien
+            </button>
         </div>
-        <input type="text" id="searchInput" class="search-input" placeholder="Suche nach Filmen und Serien...">
+    </div>
+
+    <div class="search-container" style="margin: 0.5rem auto;">
+        <input type="text" id="searchInput" class="search-input" placeholder="Suche nach Filmen und Serien..." style="width: 300px;">
         <button id="searchButton">Suchen</button>
-        <button id="top100SeriesButton">
-            <i class="fas fa-trophy"></i>
-            Top 100 Serien
-        </button>
-        <button id="top100MoviesButton">
-            <i class="fas fa-film"></i>
-            Top 100 Filme
-        </button>
     </div>
 
     <main>
-        <section id="topMovies" class="top-movies-section">
-            <h2 id="topMoviesTitle">Top Filme und Serien</h2>
-            <div id="topMoviesList" class="preview-grid"></div>
-        </section>        
-        <section id="movieResults" class="movie-grid">
-            <!-- Hier werden die Filmergebnisse eingefügt -->
-        </section>
-        <div class="load-more-container">
+        <section id="movieResults" class="movie-grid"></section>
+        <div id="topMovies" class="container"></div>
+        <div id="favorites" class="container" style="display: none;"></div>
+        <div class="load-more-container" style="margin-top: 2rem; text-align: center;">
             <button id="loadMoreButton" class="load-more-button">Mehr anzeigen</button>
-        </div>
-        <section id="favorites" class="favorites-section">
-            <!-- Hier wird die Favoriten-Sektion eingefügt -->
-        </section>
-        <div id="detailContainer" class="detail-container">
-            <!-- Hier wird die Detailansicht eingefügt -->
         </div>
     </main>
 
@@ -184,6 +182,6 @@
         <i class="fas fa-sun"></i>
     </div>
 
-    <script src="app.js"></script>
+    <script type="module" src="app.js"></script>
 </body>
 </html>

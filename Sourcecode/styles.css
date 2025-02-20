@@ -37,13 +37,14 @@ body {
 }
  
 header {
-    background-color: #1f3a56; /* Dunklerer Blauton */
+    background-color: #1f3a56;
     color: #ffffff;
     padding: 1.5rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
     position: relative;
+    height: 100px;
 }
  
 .logo {
@@ -52,10 +53,96 @@ header {
     color: #ffffff;
     text-transform: uppercase;
     letter-spacing: 1px;
-    text-align: center;
-    margin-bottom: 1rem;
+    margin: 0;
 }
- 
+
+#randomButton {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 20px;
+    background: var(--primary-color);
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#searchInput {
+    flex-grow: 1;
+    max-width: 400px;
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 20px;
+    background: var(--input-bg);
+    color: var(--text-color);
+}
+
+.hamburger {
+    cursor: pointer;
+    font-size: 2rem;
+    color: #ffffff;
+    margin: 0;
+    padding: 0;
+}
+
+.dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 120%;
+    background-color: #1f3a56;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    border-radius: 4px;
+    min-width: 150px;
+}
+
+.hamburger-menu {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-color);
+    cursor: pointer;
+    padding: 0.5rem;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: var(--card-bg);
+    min-width: 160px;
+    box-shadow: 0 8px 16px var(--shadow-color);
+    z-index: 1;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.dropdown-content a {
+    color: var(--text-color);
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content a:hover {
+    background-color: var(--hover-color);
+}
+
+.dropdown.show {
+    display: block;
+}
+
+.dropdown a {
+    color: white;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown a:hover {
+    background-color: #2c5380;
+}
+
 .search-container {
     display: flex;
     align-items: center;
@@ -202,22 +289,122 @@ header {
  
 .movie-card {
     display: flex;
+    flex-direction: column; /* Vertikale Anordnung */
+    background-color: white;
+    border-radius: 12px;
+    padding: 20px;
+    max-width: 800px;
     width: 100%;
-    max-width: 900px;
-    margin: 0 auto;
-    background: var(--card-bg);
-    border-radius: 16px;
-    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.movie-card:hover {
+    transform: scale(1.02); /* Leichte Vergrößerung bei Hover */
 }
 
 .movie-poster {
-    flex: 0 0 300px;
+    margin-bottom: 15px; /* Abstand unter dem Poster */
 }
 
 .movie-poster img {
-    width: 100%;
-    height: 450px;
-    object-fit: cover;
+    border-radius: 12px;
+    width: 200px; /* Feste Breite für das Poster */
+    height: auto;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.info-container {
+    display: flex;
+    flex-direction: column; /* Vertikale Anordnung der Informationen */
+    justify-content: flex-start; /* Platz zwischen den Elementen */
+}
+
+.left-column {
+    flex: 1;
+}
+
+.right-column {
+    flex: 1;
+}
+
+.movie-title {
+    font-size: 1.8rem;
+    color: var(--heading-color);
+    margin: 0;
+    font-weight: bold;
+}
+
+.movie-description {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #555; /* Hellgraue Farbe für die Beschreibung */
+    margin: 10px 0;
+}
+
+.streaming-info {
+    margin-top: 15px; /* Abstand über dem Streaming-Info-Bereich */
+    background-color: #f9f9f9; /* Heller Hintergrund für Streaming-Info */
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+    align-self: flex-start; /* Links ausrichten */
+}
+
+.provider {
+    display: flex;
+    align-items: center;
+    margin-top: 5px;
+}
+
+.provider img {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+}
+
+.provider-name {
+    font-weight: bold;
+}
+
+.info-grid {
+    display: flex;
+    flex-direction: column; /* Vertikale Anordnung */
+    margin-top: 10px; /* Abstand über der Info-Grid */
+    align-items: flex-start; /* Links ausrichten */
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: flex-start; /* Links ausrichten */
+    margin-top: 10px; /* Abstand über dem Button */
+}
+
+.close-button {
+    background-color: #e74c3c; /* Hintergrundfarbe */
+    color: white; /* Textfarbe */
+    padding: 10px 15px; /* Innenabstand */
+    border: none; /* Kein Rahmen */
+    border-radius: 8px; /* Abgerundete Ecken */
+    cursor: pointer; /* Zeiger-Cursor */
+    transition: background-color 0.3s, transform 0.2s; /* Übergangseffekte */
+    position: absolute; /* Absolute Positionierung */
+    bottom: 20px; /* Abstand vom unteren Rand */
+    left: 20px; /* Abstand vom linken Rand */
+}
+
+.close-button:hover {
+    background-color: #c0392b; /* Dunklere Farbe beim Hover */
+    transform: scale(1.05); /* Leichte Vergrößerung beim Hover */
+}
+
+.favorite-button {
+    background-color: #f39c12;
+    color: white;
+}
+
+.favorite-button:hover {
+    background-color: #e67e22;
+    transform: scale(1.05);
 }
 
 .content-section {
@@ -243,14 +430,6 @@ header {
     gap: 15px;
 }
 
-.movie-title {
-    font-size: 1.8rem;
-    color: var(--heading-color);
-    font-weight: 700;
-    margin: 0;
-    line-height: 1.2;
-}
-
 .info-row {
     display: flex;
     flex-wrap: wrap;
@@ -271,6 +450,7 @@ header {
 .action-buttons {
     display: flex;
     gap: 10px;
+    margin-top: 15px;
 }
 
 .action-button {
@@ -283,25 +463,6 @@ header {
     cursor: pointer;
     transition: all 0.2s ease;
     background: var(--background-color);
-}
-
-.favorite-button {
-    width: 38px;
-    color: #e74c3c;
-    font-size: 1.1rem;
-}
-
-.close-button {
-    padding: 0 16px;
-    font-size: 0.9rem;
-    color: var(--text-color);
-}
-
-.movie-description {
-    font-size: 1rem;
-    line-height: 1.6;
-    color: var(--text-color);
-    margin: 0;
 }
 
 .streaming-section {
@@ -320,18 +481,6 @@ header {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 12px;
-}
-
-.provider {
-    height: 45px;
-    padding: 8px;
-    border-radius: 8px;
-    background: var(--background-color);
-    border: 1px solid var(--input-border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
 }
 
 .provider:hover {
@@ -394,16 +543,6 @@ header {
     gap: 1rem;
 }
  
-.error-message {
-    text-align: center;
-    color: #e74c3c;
-    padding: 20px;
-    background: var(--card-bg);
-    border-radius: 8px;
-    margin: 20px auto;
-    max-width: 600px;
-}
- 
 /* Loading Animation */
 .loading {
     text-align: center;
@@ -418,7 +557,7 @@ header {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.95));
+    background: rgba(0, 0, 0, 0.85);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -428,20 +567,20 @@ header {
 }
  
 /* Styling für das Detailansicht-Fenster */
-.movie-card-detail {
+.movie-card {
     display: flex;
-    flex-direction: column;
+    flex-direction: row; /* Horizontale Anordnung */
     background-color: white;
-    border-radius: 8px;
+    border-radius: 12px;
     padding: 20px;
-    max-width: 600px;
+    max-width: 800px;
     width: 100%;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    z-index: 10000;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s; /* Sanfte Animation bei Hover */
 }
  
 /* Styling für den "Schließen"-Button im Detailbereich */
-.movie-card-detail button {
+.movie-card button {
     background-color: #e74c3c;
     color: white;
     padding: 10px;
@@ -451,7 +590,7 @@ header {
     margin-top: 10px;
 }
  
-.movie-card-detail button:hover {
+.movie-card button:hover {
     background-color: #c0392b;
 }
  
@@ -487,25 +626,6 @@ header {
  
 ::-webkit-scrollbar-thumb:hover {
     background: #4e9fe2;
-}
- 
-.hamburger {
-    cursor: pointer;
-    font-size: 2rem;
-    color: #ffffff;
-    margin-left: 20px;
-}
- 
-.dropdown {
-    display: none;
-    position: absolute;
-    right: 0;
-    top: 100%;
-    background-color: #1f3a56;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    border-radius: 4px;
-    min-width: 150px;
 }
  
 .dropdown.show {
@@ -963,7 +1083,7 @@ input::placeholder {
 
 /* Streaming Provider Styling */
 .streaming-info {
-    margin: 15px 0;
+    margin-top: 15px;
     padding: 15px;
     background: var(--card-bg);
     border-radius: 8px;
@@ -1220,4 +1340,98 @@ input::placeholder {
         padding: 4px 8px;
         font-size: 0.8rem;
     }
+}
+
+/* Navbar Styling */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: var(--header-bg);
+    box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+.nav-center {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-grow: 1;
+    justify-content: center;
+    margin: 0 2rem;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+}
+
+.search-container {
+    flex-grow: 1;
+    max-width: 400px;
+}
+
+#searchInput {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 20px;
+    background: var(--input-bg);
+    color: var(--text-color);
+}
+
+.nav-button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 20px;
+    background: var(--primary-color);
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.nav-button:hover {
+    background: var(--primary-color-dark);
+}
+
+/* Dropdown Styling */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.hamburger-menu {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-color);
+    cursor: pointer;
+    padding: 0.5rem;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: var(--card-bg);
+    min-width: 160px;
+    box-shadow: 0 8px 16px var(--shadow-color);
+    z-index: 1;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.dropdown-content a {
+    color: var(--text-color);
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content a:hover {
+    background-color: var(--hover-color);
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
 }
