@@ -1052,8 +1052,21 @@ function updateNavigation(user) {
 onAuthStateChanged(auth, (user) => {
     console.log('Auth State Changed:', user);
     updateNavigation(user);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const view = urlParams.get("view") || "favorites";
+
     if (user) {
-        loadFavorites();
+        if (view === "favorites") {
+            loadFavorites();
+        } else if (view === "watched") {
+            loadWatched();
+        } else if (view === "planned") {
+            loadPlanned();
+        }
+    } else {
+        const userContent = document.getElementById("userContent");
+        userContent.innerHTML = "<p>Bitte anmelden, um deine Inhalte zu sehen.</p>";
     }
 });
 

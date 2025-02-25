@@ -38,7 +38,7 @@
 
     <!-- Dynamischer Content-Bereich -->
     <section id="userContent" class="container">
-      <!-- Der Inhalt wird hier dynamisch eingefügt -->
+      <!-- Der Inhalt wird hier dynamisch basierend auf dem URL-Parameter eingefügt -->
     </section>
   </main>
   
@@ -52,9 +52,9 @@
     <p>&copy; 2024 FilmFolio</p>
   </footer>
   
-  <!-- Skript: Dark Mode und dynamischer Content -->
+  <!-- Skript: Dark Mode & dynamischer Content -->
   <script type="module">
-    // Dark Mode Toggle (wie in der Hauptseite)
+    // Dark Mode Toggle
     const themeToggle = document.getElementById('themeToggle');
     const icon = themeToggle.querySelector('i');
     const savedTheme = localStorage.getItem('theme') || 'light';
@@ -75,28 +75,25 @@
       return urlParams.get(param);
     }
     
-    // Dynamischer Content: Container basierend auf dem "view"-Parameter einfügen
+    // Dynamischer Content: Container basierend auf "view" einfügen
     document.addEventListener("DOMContentLoaded", () => {
       const view = getQueryParam("view") || "favorites";
       const userContent = document.getElementById("userContent");
   
       if (view === "favorites") {
         userContent.innerHTML = `
-          <h2>Meine Favoriten</h2>
           <div id="favoritesContainer" class="container">
             <p>Favoriten werden geladen...</p>
           </div>
         `;
       } else if (view === "watched") {
         userContent.innerHTML = `
-          <h2>Bereits gesehen</h2>
           <div id="watchedContainer" class="container">
             <p>Bereits gesehen werden geladen...</p>
           </div>
         `;
       } else if (view === "planned") {
         userContent.innerHTML = `
-          <h2>Geplant zu sehen</h2>
           <div id="plannedContainer" class="container">
             <p>Titel, die du geplant hast, werden geladen...</p>
           </div>
@@ -109,7 +106,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { loadFavorites, loadWatched, loadPlanned } from "./app.js"; // Passe den Pfad an
+    import { loadFavorites, loadWatched, loadPlanned } from "./app.js"; // Pfad ggf. anpassen
     import firebaseConfig from "./firebase-config.js";
   
     // Firebase initialisieren
@@ -118,10 +115,11 @@
     window.auth = auth;
   
     document.addEventListener("DOMContentLoaded", () => {
-      const view = new URLSearchParams(window.location.search).get("view") || "favorites";
+      const urlParams = new URLSearchParams(window.location.search);
+      const view = urlParams.get("view") || "favorites";
       const userContent = document.getElementById("userContent");
   
-      // Nachdem der Container gesetzt ist, Auth-Status prüfen und den entsprechenden Content laden
+      // Nachdem der Container eingefügt wurde, Auth-Status prüfen und den entsprechenden Content laden
       onAuthStateChanged(auth, (user) => {
         console.log("User in user.html:", user);
         if (user) {
