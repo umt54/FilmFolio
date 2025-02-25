@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -27,45 +28,42 @@
 
         // Funktion zum Aktualisieren der Navigation
         function updateNavigation(user) {
-            const loginLink = document.getElementById('loginLink');
-            const logoutLink = document.getElementById('logoutLink');
-            const favoritesLink = document.getElementById('favoritesLink');
-            const dropdown = document.getElementById('dropdown');
+    const loginLink = document.getElementById('loginLink');
+    const userLink = document.getElementById('userLink');
+    const logoutLink = document.getElementById('logoutLink');
 
-            if (user) {
-                // User ist eingeloggt
-                loginLink.classList.add('disabled');
-                loginLink.style.display = 'block';
-                logoutLink.style.display = 'block';
-                favoritesLink.style.display = 'block';
-                favoritesLink.classList.remove('disabled');
-                logoutLink.classList.remove('disabled');
-                
-                // Verhindere Navigation zur Login-Seite
-                loginLink.onclick = (e) => {
-                    e.preventDefault();
-                };
-            } else {
-                // User ist nicht eingeloggt
-                loginLink.classList.remove('disabled');
-                loginLink.style.display = 'block';
-                logoutLink.style.display = 'none';
-                favoritesLink.style.display = 'block';
-                favoritesLink.classList.add('disabled');
-                logoutLink.classList.add('disabled');
-                
-                // Erlaube Navigation zur Login-Seite
-                loginLink.onclick = null;
-            }
-
-            // Dropdown schließen
-            dropdown.classList.remove('show');
+    if (user) {
+        // Wenn der Nutzer eingeloggt ist:
+        if (loginLink) {
+            loginLink.style.display = 'none'; // Login-Link verstecken
         }
+        if (userLink) {
+            userLink.style.display = 'block'; // User-Link anzeigen
+        }
+        if (logoutLink) {
+            logoutLink.style.display = 'block'; // Logout-Link anzeigen
+            logoutLink.classList.remove('disabled');
+        }
+    } else {
+        // Wenn kein Nutzer eingeloggt ist:
+        if (loginLink) {
+            loginLink.style.display = 'block'; // Login-Link anzeigen
+        }
+        if (userLink) {
+            userLink.style.display = 'none'; // User-Link verstecken
+        }
+        if (logoutLink) {
+            logoutLink.style.display = 'none'; // Logout-Link ausblenden
+            logoutLink.classList.add('disabled');
+        }
+    }
+}
+
 
         // Auth State Observer
         onAuthStateChanged(auth, (user) => {
+            console.log('Auth State Changed:', user);
             updateNavigation(user);
-            console.log('Auth State Changed:', user ? 'User eingeloggt' : 'User nicht eingeloggt');
         });
 
         // Abmelde-Funktion
@@ -88,17 +86,6 @@
         });
 
         // Favoriten-Link Handler
-        document.getElementById('favoritesLink').addEventListener('click', (e) => {
-            e.preventDefault();
-            if (!auth.currentUser) {
-                alert('Bitte melden Sie sich an, um Ihre Favoriten zu sehen.');
-                return;
-            }
-            if (e.target.classList.contains('disabled')) {
-                return;
-            }
-            loadFavorites();
-        });
 
         // Initialer Update der Navigation
         updateNavigation(auth.currentUser);
@@ -112,9 +99,9 @@
             <div class="hamburger" id="hamburger" onclick="toggleDropdown()" style="margin: 0; font-size: 1.5rem;">
                 &#9776;
             </div>
-            <div class="dropdown" id="dropdown" style="top: 100%; right: 0;">
+            <div class="dropdown" id="dropdown">
                 <a href="login.html" id="loginLink">Anmelden</a>
-                <a href="#" id="favoritesLink" class="disabled">Favoriten</a>
+                <a href="user.html" id="userLink">User</a>
                 <a href="#" id="logoutLink" class="disabled">Abmelden</a>
             </div>
         </div>
@@ -122,9 +109,6 @@
 
     <div class="search-container" style="margin: 0.5rem auto;">
         <div class="left-buttons" style="display: flex; gap: 0.5rem;">
-            <select id="genreFilter" style="background-color: #333; color: white; border: none;">
-                <option value="">Genre auswählen</option>
-            </select>
             <button id="randomMovieButton">Zufälligen Titel anzeigen</button>
             <button id="top100MoviesButton" style="background-color: #4facfe;">
                 <i class="fas fa-film"></i>
@@ -138,7 +122,7 @@
     </div>
 
     <div class="search-container" style="margin: 0.5rem auto;">
-        <input type="text" id="searchInput" class="search-input" placeholder="Suche nach Filmen und Serien..." style="width: 300px;">
+        <input type="text" id="searchInput" class="search-input" placeholder="Suche nach Filmen und Serien..." style="width: 300px; border: 2px solid #4facfe;">
     </div>
 
     <main>
@@ -163,6 +147,7 @@
     <div class="theme-toggle" id="themeToggle">
         <i class="fas fa-moon"></i>
     </div>
+
 
     <script type="module" src="app.js"></script>
     
