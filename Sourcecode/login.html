@@ -38,11 +38,19 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import firebaseConfig from './firebase-config.js';
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+
+        // Überprüfe, ob der Benutzer bereits angemeldet ist
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Benutzer ist bereits angemeldet, leite zur Hauptseite weiter
+                window.location.href = 'index.html';
+            }
+        });
 
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();

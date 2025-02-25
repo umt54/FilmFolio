@@ -88,7 +88,7 @@ function displayResults(results) {
         // Daten aufbereiten
         const title = item.title || item.name;
         const mediaType = item.media_type;
-        const safeData = JSON.stringify({
+        const itemData = {
             id: item.id,
             title: title,
             poster_path: item.poster_path,
@@ -96,10 +96,10 @@ function displayResults(results) {
             vote_average: item.vote_average,
             release_date: item.release_date || item.first_air_date,
             mediaType: mediaType
-        }).replace(/"/g, '&quot;'); // Doppelte Anführungszeichen escapen
+        };
 
         html += `
-            <div class="preview-card" onclick="showDetailCard(${safeData})">
+            <div class="preview-card" data-item='${JSON.stringify(itemData).replace(/'/g, "&apos;").replace(/"/g, "&quot;")}'>
                 <img src="${item.poster_path 
                     ? `https://image.tmdb.org/t/p/w500${item.poster_path}` 
                     : './images/no-poster.jpg'}" 
@@ -116,6 +116,15 @@ function displayResults(results) {
     });
     html += '</div>';
     container.innerHTML = html;
+
+    // Event-Listener für die Preview-Cards hinzufügen
+    const previewCards = container.querySelectorAll('.preview-card');
+    previewCards.forEach(card => {
+        card.addEventListener('click', function() {
+            const itemData = JSON.parse(this.getAttribute('data-item'));
+            showDetailCard(itemData);
+        });
+    });
 }
 
 // Top-Filme anzeigen
@@ -169,7 +178,47 @@ document.addEventListener('DOMContentLoaded', () => {
             if (query) {
                 searchMovies(query);
             } else {
-                loadTopMovies();
+                document.getElementById('movieResults').innerHTML = '';
+            }
+        });
+    }
+
+    // Event Listener für Top 100 Filme Button
+    const top100MoviesButton = document.getElementById('top100MoviesButton');
+    if (top100MoviesButton) {
+        top100MoviesButton.addEventListener('click', () => {
+            currentPage = 1;
+            currentType = 'movie';
+            loadTopMovies();
+        });
+    }
+
+    // Event Listener für Top 100 Serien Button
+    const top100SeriesButton = document.getElementById('top100SeriesButton');
+    if (top100SeriesButton) {
+        top100SeriesButton.addEventListener('click', () => {
+            currentPage = 1;
+            currentType = 'tv';
+            loadTopSeries();
+        });
+    }
+
+    // Event Listener für den Zufälligen Film Button
+    const randomMovieButton = document.getElementById('randomMovieButton');
+    if (randomMovieButton) {
+        randomMovieButton.addEventListener('click', showRandomMovie);
+    }
+
+    // Event Listener für den Mehr Laden Button
+    const loadMoreButton = document.getElementById('loadMoreButton');
+    if (loadMoreButton) {
+        loadMoreButton.addEventListener('click', async () => {
+            if (currentType === 'movie') {
+                currentPage++;
+                await loadTopMovies();
+            } else if (currentType === 'tv') {
+                currentPage++;
+                await loadTopSeries();
             }
         });
     }
@@ -178,16 +227,19 @@ document.addEventListener('DOMContentLoaded', () => {
     loadTopMovies();
 });
 
+// Funktion im globalen Kontext verfügbar machen
+window.showDetailCard = showDetailCard;
+
 // Export der Funktionen
 export { loadFavorites, showDetailCard };
-
+ 
 let selectedGenre = '';
 let currentPage = 1;
 let currentType = '';
 let allResults = []; // Alle bisher geladenen Ergebnisse
 let favorites = []; // Favoriten-Array
 let isLoading = false;
-
+ 
 // Event Listener für die Suchfunktion
 document.getElementById('searchButton').addEventListener('click', performSearch);
 document.getElementById('searchInput').addEventListener('keyup', (e) => {
@@ -195,22 +247,22 @@ document.getElementById('searchInput').addEventListener('keyup', (e) => {
         performSearch();
     }
 });
-
+ 
 async function performSearch() {
     const searchTerm = document.getElementById('searchInput').value.trim();
     if (!searchTerm) return;
-
+ 
     try {
         const movieResults = document.getElementById('movieResults');
         movieResults.innerHTML = '<div class="loading">Suche läuft...</div>';
-
+ 
         const [movieResponse, tvResponse] = await Promise.all([
             fetch(`https://api.themoviedb.org/3/search/movie?api_key=${b404d8bc1c229e9cb771c179755ad733}&language=de&query=${encodeURIComponent(searchTerm)}`),
             fetch(`https://api.themoviedb.org/3/search/tv?api_key=${b404d8bc1c229e9cb771c179755ad733}&language=de&query=${encodeURIComponent(searchTerm)}`)
         ]);
-
+ 
         const [movieData, tvData] = await Promise.all([movieResponse.json(), tvResponse.json()]);
-
+ 
         const movies = movieData.results.map(movie => ({
             ...movie,
             mediaType: 'movie',
@@ -218,7 +270,7 @@ async function performSearch() {
             release_date: movie.release_date,
             score: calculateScore(movie.vote_average, movie.popularity, movie.vote_count)
         }));
-
+ 
         const tvShows = tvData.results.map(show => ({
             ...show,
             mediaType: 'tv',
@@ -226,43 +278,43 @@ async function performSearch() {
             release_date: show.first_air_date,
             score: calculateScore(show.vote_average, show.popularity, show.vote_count)
         }));
-
+ 
         allResults = [...movies, ...tvShows];
 
         // Sortiere die Ergebnisse nach dem berechneten Score
         allResults.sort((a, b) => b.score - a.score);
 
         movieResults.innerHTML = '';
-
+ 
         if (allResults.length === 0) {
             movieResults.innerHTML = '<p>Keine Ergebnisse gefunden</p>';
             return;
         }
-
+ 
         // Erstelle Grid-Container für die Vorschaukarten
         const gridContainer = document.createElement('div');
         gridContainer.className = 'preview-grid';
         movieResults.appendChild(gridContainer);
-
+ 
         allResults.forEach(item => {
             const previewCard = document.createElement('div');
             previewCard.className = 'preview-card';
             previewCard.innerHTML = `
                 <img src="${item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : './images/no-poster.jpg'}" alt="${item.title || 'Kein Titel verfügbar'}">
                 <div class="card-content">
-                    <h3>${item.title || 'Kein Titel verfügbar'}</h3>
+<h3>${item.title || 'Kein Titel verfügbar'}</h3>
                     <div class="rating-info">
-                        <p class="rating">⭐ ${item.vote_average ? item.vote_average.toFixed(1) : 'N/A'}/10</p>
+<p class="rating">⭐ ${item.vote_average ? item.vote_average.toFixed(1) : 'N/A'}/10</p>
                         <p class="popularity">${Math.round(item.popularity)} Views</p>
                     </div>
                     <p class="vote-count">${item.vote_count ? item.vote_count.toLocaleString() : '0'} Bewertungen</p>
                 </div>
             `;
-
+ 
             previewCard.addEventListener('click', () => {
                 showDetailCard(item);
             });
-
+ 
             gridContainer.appendChild(previewCard);
         });
     } catch (error) {
@@ -288,7 +340,7 @@ function calculateScore(voteAverage, popularity, voteCount) {
            (normalizedPopularity * popularityWeight) + 
            (normalizedVoteCount * voteCountWeight);
 }
-
+ 
 // Funktion zum Abrufen der Seriendetails
 async function getSeriesDetails(seriesId) {
     try {
@@ -300,7 +352,7 @@ async function getSeriesDetails(seriesId) {
         return null;
     }
 }
-
+ 
 // Funktion zum Anzeigen von Top-Inhalten (Filme/Serien)
 function displayTopContent(results, type) {
     const container = document.getElementById('movieResults');
@@ -321,16 +373,18 @@ function displayTopContent(results, type) {
 
     results.forEach((item, index) => {
         const position = (currentPage - 1) * 20 + index + 1;
+        const itemData = {
+            id: item.id,
+            title: item.title || item.name,
+            poster_path: item.poster_path,
+            overview: item.overview,
+            vote_average: item.vote_average,
+            release_date: item.release_date || item.first_air_date,
+            mediaType: type
+        };
+
         html += `
-            <div class="preview-card" onclick='showDetailCard(${JSON.stringify({
-                id: item.id,
-                title: item.title || item.name,
-                poster_path: item.poster_path,
-                overview: item.overview,
-                vote_average: item.vote_average,
-                release_date: item.release_date || item.first_air_date,
-                mediaType: type
-            }).replace(/'/g, "&apos;")})'>
+            <div class="preview-card" onclick='window.showDetailCard(${JSON.stringify(itemData).replace(/'/g, "&apos;").replace(/"/g, "&quot;")})'>
                 <div class="rank-badge">#${position}</div>
                 <img src="${item.poster_path 
                     ? 'https://image.tmdb.org/t/p/w500' + item.poster_path 
@@ -356,11 +410,11 @@ function displayTopContent(results, type) {
 
 async function showDetailCard(item) {
     let streamingInfo = '';
-
+    
     try {
         const streamingResponse = await fetch(`https://api.themoviedb.org/3/${item.mediaType || 'movie'}/${item.id}/watch/providers?api_key=${apiKey}`);
         const streamingData = await streamingResponse.json();
-
+        
         if (streamingData.results && streamingData.results.DE) {
             const providers = streamingData.results.DE;
             if (providers.flatrate && providers.flatrate.length > 0) {
@@ -401,10 +455,10 @@ async function showDetailCard(item) {
                     <div class="streaming-info">
                         <h4>🎬 Verfügbar bei:</h4>
                         <a href="${providerUrl}" target="_blank" class="provider-link">
-                            <div class="provider">
+                                <div class="provider">
                                 <img src="https://image.tmdb.org/t/p/original${mainProvider.logo_path}" alt="${providerDisplayNames}">
                                 <p class="provider-name">${providerDisplayNames}</p>
-                            </div>
+                                </div>
                         </a>
                     </div>`;
             } else {
@@ -454,39 +508,39 @@ async function showDetailCard(item) {
     });
 }
 
-// Genre Filter
-document.getElementById('genreFilter').addEventListener('change', (e) => {
-    selectedGenre = e.target.value;
-});
-window.showDetailCard = showDetailCard;
-// Lade Genres
-async function loadGenres() {
-    try {
-        const [movieGenres, tvGenres] = await Promise.all([
+    // Genre Filter
+    document.getElementById('genreFilter').addEventListener('change', (e) => {
+        selectedGenre = e.target.value;
+    });
+
+    // Lade Genres
+    async function loadGenres() {
+        try {
+            const [movieGenres, tvGenres] = await Promise.all([
             fetch(`https://api.themoviedb.org/3/genre/movie/list?api_key=${b404d8bc1c229e9cb771c179755ad733}&language=de`),
             fetch(`https://api.themoviedb.org/3/genre/tv/list?api_key=${b404d8bc1c229e9cb771c179755ad733}&language=de`)
-        ]);
+            ]);
 
-        const movieData = await movieGenres.json();
-        const tvData = await tvGenres.json();
+            const movieData = await movieGenres.json();
+            const tvData = await tvGenres.json();
 
-        const allGenres = [...new Map([...movieData.genres, ...tvData.genres]
-            .map(item => [item.id, item])).values()];
+            const allGenres = [...new Map([...movieData.genres, ...tvData.genres]
+                .map(item => [item.id, item])).values()];
 
-        const genreSelect = document.getElementById('genreFilter');
-        genreSelect.innerHTML = '<option value="">Genre auswählen</option>';
-        allGenres.forEach(genre => {
-            genreSelect.innerHTML += `<option value="${genre.id}">${genre.name}</option>`;
-        });
-    } catch (error) {
-        console.error('Fehler beim Laden der Genres:', error);
+            const genreSelect = document.getElementById('genreFilter');
+            genreSelect.innerHTML = '<option value="">Genre auswählen</option>';
+            allGenres.forEach(genre => {
+                genreSelect.innerHTML += `<option value="${genre.id}">${genre.name}</option>`;
+            });
+        } catch (error) {
+            console.error('Fehler beim Laden der Genres:', error);
+        }
     }
-}
 
-// Initialisierung
-window.onload = loadGenres;
+    // Initialisierung
+    window.onload = loadGenres;
 
-document.getElementById('randomMovie').textContent = 'Zufälliger Titel';
+    document.getElementById('randomMovie').textContent = 'Zufälliger Titel';
 
 // Zufälliger Titel Button
 document.getElementById('randomMovie').addEventListener('click', async () => {
@@ -561,7 +615,7 @@ document.getElementById('loadMoreButton').addEventListener('click', async () => 
     
     if (!grid || !currentType) {
         console.error('Grid oder currentType nicht gefunden');
-        return;
+            return;
     }
     
     try {
@@ -649,8 +703,8 @@ async function loadFavorites() {
                     <p>Du hast noch keine Favoriten gespeichert.</p>
                 </div>
             `;
-            return;
-        }
+                return;
+            }
 
         let favoritesHTML = `
             <div class="container">
@@ -687,7 +741,7 @@ async function loadFavorites() {
         favoritesSection.innerHTML = favoritesHTML;
         console.log('Favoriten wurden geladen und angezeigt');
 
-    } catch (error) {
+        } catch (error) {
         console.error('Fehler beim Laden der Favoriten:', error);
         const favoritesSection = document.getElementById('favorites');
         favoritesSection.innerHTML = `
@@ -732,9 +786,6 @@ onAuthStateChanged(auth, async (user) => {
 
 window.closeDetailCard = closeDetailCard;
 
-// Funktion im globalen Kontext verfügbar machen
-window.showDetailCard = showDetailCard;
-
 async function showRandomMovie() {
     try {
         const response = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${apiKey}&language=de&page=1`);
@@ -749,5 +800,5 @@ async function showRandomMovie() {
 }
 
 document.getElementById('randomMovieButton').addEventListener('click', showRandomMovie);
-    
+
     
