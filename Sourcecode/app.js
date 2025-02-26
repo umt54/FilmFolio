@@ -274,9 +274,14 @@ async function performSearch() {
         movieResults.innerHTML = '<div class="loading">Suche läuft...</div>';
  
         const [movieResponse, tvResponse] = await Promise.all([
-            fetch(`https://api.themoviedb.org/3/search/movie?api_key=${b404d8bc1c229e9cb771c179755ad733}&language=de&query=${encodeURIComponent(searchTerm)}`),
-            fetch(`https://api.themoviedb.org/3/search/tv?api_key=${b404d8bc1c229e9cb771c179755ad733}&language=de&query=${encodeURIComponent(searchTerm)}`)
+            fetch(`https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&language=de&query=${encodeURIComponent(searchTerm)}`),
+            fetch(`https://api.themoviedb.org/3/search/tv?api_key=${apiKey}&language=de&query=${encodeURIComponent(searchTerm)}`)
         ]);
+ 
+        // Überprüfen, ob die Antworten erfolgreich sind
+        if (!movieResponse.ok || !tvResponse.ok) {
+            throw new Error('Fehler bei der API-Anfrage');
+        }
  
         const [movieData, tvData] = await Promise.all([movieResponse.json(), tvResponse.json()]);
  
@@ -319,12 +324,11 @@ async function performSearch() {
             previewCard.innerHTML = `
                 <img src="${item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : './images/no-poster.jpg'}" alt="${item.title || 'Kein Titel verfügbar'}">
                 <div class="card-content">
-<h3>${item.title || 'Kein Titel verfügbar'}</h3>
+                    <h3>${item.title || 'Kein Titel verfügbar'}</h3>
                     <div class="rating-info">
-<p class="rating">⭐ ${item.vote_average ? item.vote_average.toFixed(1) : 'N/A'}/10</p>
+                        <p class="rating">⭐ ${item.vote_average ? item.vote_average.toFixed(1) : 'N/A'}/10</p>
                         <p class="popularity">${Math.round(item.popularity)} Views</p>
                     </div>
-                    <p class="vote-count">${item.vote_count ? item.vote_count.toLocaleString() : '0'} Bewertungen</p>
                 </div>
             `;
  
@@ -551,77 +555,11 @@ async function showDetailCard(item) {
     const plannedButton = detailCardOverlay.querySelector('.planned-button');
   
     if (watchedButton) {
-      watchedButton.addEventListener('click', async () => {
-        try {
-          const user = auth.currentUser;
-          if (!user) {
-            alert('Bitte melden Sie sich an, um Filme zu Ihrer Watched-Liste hinzuzufügen.');
-            return;
-          }
-          const watchedRef = collection(db, 'watched', user.uid, 'titles');
-          const plannedRef = collection(db, 'planned', user.uid, 'titles');
-          const watchedDocRef = doc(watchedRef, item.id.toString());
-          const plannedDocRef = doc(plannedRef, item.id.toString());
-          
-          const watchedSnap = await getDoc(watchedDocRef);
-          if (watchedSnap.exists()) {
-            await deleteDoc(watchedDocRef);
-            console.log('Film aus Watched entfernt:', item.title);
-            watchedButton.textContent = 'Watched';
-            showFavoritePopup("Titel aus Watched entfernt");
-          } else {
-            await setDoc(watchedDocRef, item);
-            console.log('Film zu Watched hinzugefügt:', item.title);
-            watchedButton.textContent = 'Watched';
-            showFavoritePopup("Titel zu Watched hinzugefügt");
-            // Entferne aus Planned, falls vorhanden
-            const plannedSnap = await getDoc(plannedDocRef);
-            if (plannedSnap.exists()) {
-              await deleteDoc(plannedDocRef);
-              plannedButton.textContent = 'Planned to Watch';
-            }
-          }
-        } catch (error) {
-          console.error('Fehler bei Watched:', error);
-        }
-      });
+      watchedButton.addEventListener('click', () => toggleWatched(item));
     }
   
     if (plannedButton) {
-      plannedButton.addEventListener('click', async () => {
-        try {
-          const user = auth.currentUser;
-          if (!user) {
-            alert('Bitte melden Sie sich an, um Filme zu Ihrer Planned-Liste hinzuzufügen.');
-            return;
-          }
-          const plannedRef = collection(db, 'planned', user.uid, 'titles');
-          const watchedRef = collection(db, 'watched', user.uid, 'titles');
-          const plannedDocRef = doc(plannedRef, item.id.toString());
-          const watchedDocRef = doc(watchedRef, item.id.toString());
-          
-          const plannedSnap = await getDoc(plannedDocRef);
-          if (plannedSnap.exists()) {
-            await deleteDoc(plannedDocRef);
-            console.log('Film aus Planned entfernt:', item.title);
-            plannedButton.textContent = 'Planned to Watch';
-            showFavoritePopup("Titel aus Planned entfernt");
-          } else {
-            await setDoc(plannedDocRef, item);
-            console.log('Film zu Planned hinzugefügt:', item.title);
-            plannedButton.textContent = 'Planned to Watch';
-            showFavoritePopup("Titel zu Planned hinzugefügt");
-            // Entferne aus Watched, falls vorhanden
-            const watchedSnap = await getDoc(watchedDocRef);
-            if (watchedSnap.exists()) {
-              await deleteDoc(watchedDocRef);
-              watchedButton.textContent = 'Watched';
-            }
-          }
-        } catch (error) {
-          console.error('Fehler bei Planned:', error);
-        }
-      });
+      plannedButton.addEventListener('click', () => togglePlanned(item));
     }
   
     // Favoriten-Button als Herz
@@ -1050,24 +988,24 @@ function updateNavigation(user) {
 
 // Auth State Observer
 onAuthStateChanged(auth, (user) => {
-    console.log('Auth State Changed:', user);
-    updateNavigation(user);
+  console.log('Auth State Changed:', user);
+  updateNavigation(user);
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const view = urlParams.get("view") || "favorites";
+  const urlParams = new URLSearchParams(window.location.search);
+  const view = urlParams.get("view") || "favorites";
 
-    if (user) {
-        if (view === "favorites") {
-            loadFavorites();
-        } else if (view === "watched") {
-            loadWatched();
-        } else if (view === "planned") {
-            loadPlanned();
-        }
-    } else {
-        const userContent = document.getElementById("userContent");
-        userContent.innerHTML = "<p>Bitte anmelden, um deine Inhalte zu sehen.</p>";
-    }
+  if (user) {
+      if (view === "favorites") {
+          loadFavorites();
+      } else if (view === "watched") {
+          loadWatched();
+      } else if (view === "planned") {
+          loadPlanned();
+      }
+  } else {
+      const userContent = document.getElementById("userContent");
+      userContent.innerHTML = "<p>Bitte anmelden, um deine Inhalte zu sehen.</p>";
+  }
 });
 
 
@@ -1160,3 +1098,57 @@ function showFavoritePopup(message) {
   });
 
   export { loadFavorites, loadWatched, loadPlanned, showDetailCard };
+
+// Funktion zum Hinzufügen oder Entfernen von Titeln aus der Watched-Liste
+async function toggleWatched(item) {
+    const user = auth.currentUser;
+    if (!user) {
+        alert('Bitte melden Sie sich an, um Filme zu Ihrer Watched-Liste hinzuzufügen.');
+        return;
+    }
+    const watchedRef = collection(db, 'watched', user.uid, 'titles');
+    const watchedDocRef = doc(watchedRef, item.id.toString());
+
+    try {
+        console.log('Überprüfe, ob der Film in der Watched-Liste vorhanden ist:', item.title);
+        const watchedSnap = await getDoc(watchedDocRef);
+        if (watchedSnap.exists()) {
+            await deleteDoc(watchedDocRef);
+            console.log('Film aus Watched entfernt:', item.title);
+            showFavoritePopup("Titel aus Watched entfernt");
+        } else {
+            await setDoc(watchedDocRef, item);
+            console.log('Film zu Watched hinzugefügt:', item.title);
+            showFavoritePopup("Titel zu Watched hinzugefügt");
+        }
+    } catch (error) {
+        console.error('Fehler bei Watched:', error);
+    }
+}
+
+// Funktion zum Hinzufügen oder Entfernen von Titeln aus der Planned-Liste
+async function togglePlanned(item) {
+    const user = auth.currentUser;
+    if (!user) {
+        alert('Bitte melden Sie sich an, um Filme zu Ihrer Planned-Liste hinzuzufügen.');
+        return;
+    }
+    const plannedRef = collection(db, 'planned', user.uid, 'titles');
+    const plannedDocRef = doc(plannedRef, item.id.toString());
+
+    try {
+        console.log('Überprüfe, ob der Film in der Planned-Liste vorhanden ist:', item.title);
+        const plannedSnap = await getDoc(plannedDocRef);
+        if (plannedSnap.exists()) {
+            await deleteDoc(plannedDocRef);
+            console.log('Film aus Planned entfernt:', item.title);
+            showFavoritePopup("Titel aus Planned entfernt");
+        } else {
+            await setDoc(plannedDocRef, item);
+            console.log('Film zu Planned hinzugefügt:', item.title);
+            showFavoritePopup("Titel zu Planned hinzugefügt");
+        }
+    } catch (error) {
+        console.error('Fehler bei Planned:', error);
+    }
+}
