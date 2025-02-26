@@ -485,6 +485,43 @@ header {
     background-color: #4e9fe2;
     transform: translateY(-2px);
   }
+
+/* Einheitliche Button-Größe und Schrift */
+/* Einheitliche Styles für alle Buttons */
+.close-button,
+.watched-button,
+.planned-button {
+    min-width: 150px; /* Gleiche Breite für alle Buttons */
+    font-size: 1rem; /* Einheitliche Schriftgröße */
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    color: white; /* Weißer Text */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Spezifische Farben für jeden Button */
+.close-button {
+    background-color: #e74c3c; /* Rot für "Zurück" */
+}
+
+.close-button:hover {
+    background-color: #c0392b;
+}
+
+.watched-button,
+.planned-button {
+    background-color: #4facfe; /* Blau für Action-Buttons */
+}
+
+.watched-button:hover,
+.planned-button:hover {
+    background-color: #4e9fe2;
+}
   
   /* Favoriten-Button als Herz */
   .favorite-button {
@@ -1521,4 +1558,5 @@ footer p {
     position: static;  /* Sicherstellen, dass keine absolute Positionierung gilt */
     display: block;
   }
+  
   

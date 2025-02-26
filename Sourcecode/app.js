@@ -104,6 +104,9 @@ function displayResults(results) {
 
 
 
+window.showDetailCard = showDetailCard;
+
+
 // Top-Filme anzeigen
 function displayTopMovies(movies) {
     const container = document.getElementById('topMovies');
@@ -189,47 +192,111 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   
     // "Mehr anzeigen"-Button (nur, wenn vorhanden)
-    const loadMoreButton = document.getElementById('loadMoreButton');
-    if (loadMoreButton) {
-      loadMoreButton.addEventListener('click', async () => {
-        const movieResults = document.getElementById('movieResults');
-        const grid = movieResults ? movieResults.querySelector('.preview-grid') : null;
-        if (!grid || !window.currentType) {
-          console.error('Grid oder currentType nicht gefunden');
-          return;
-        }
-        try {
-          window.currentPage++;
-          const response = await fetch(`https://api.themoviedb.org/3/${window.currentType}/top_rated?api_key=${apiKey}&language=de&page=${window.currentPage}`);
-          if (!response.ok) {
-            throw new Error('Netzwerk-Antwort war nicht ok');
-          }
-          const data = await response.json();
-          data.results.forEach((item, index) => {
-            const card = document.createElement('div');
-            card.className = 'preview-card';
-            const title = window.currentType === 'movie' ? item.title : item.name;
-            const date = window.currentType === 'movie' ? item.release_date : item.first_air_date;
-            card.innerHTML = `
+    // Globale Variable zur Nachverfolgung der insgesamt geladenen Karten
+    // Globale Variable zur Nachverfolgung der insgesamt geladenen Karten
+// Globale Variable zur Nachverfolgung der insgesamt geladenen Karten
+// Globale Variablen zur Nachverfolgung der geladenen Karten und Seitenzahl
+// Globale Variablen nur EINMAL definieren
+// Globale Variablen nur EINMAL definieren
+// Globale Variablen
+// Globale Variablen
+let totalCardsLoaded = 0;
+window.currentPage = 1;
+window.currentType = 'movie'; // Standardmäßig auf 'movie' setzen
+
+// "Mehr anzeigen"-Button
+
+
+async function loadMoreItems() {
+  const movieResults = document.getElementById('movieResults');
+  const grid = movieResults.querySelector('.preview-grid');
+
+  if (!grid || !window.currentType) {
+      console.error('Grid oder currentType nicht gefunden');
+      return;
+  }
+
+  try {
+      window.currentPage += 1;
+      console.log("Lade Seite:", window.currentPage);
+      
+      const response = await fetch(`https://api.themoviedb.org/3/${window.currentType}/top_rated?api_key=${apiKey}&language=de&page=${window.currentPage}`);
+      if (!response.ok) {
+          throw new Error('Netzwerk-Antwort war nicht ok');
+      }
+      const data = await response.json();
+
+      data.results.forEach((item, index) => {
+          const card = document.createElement('div');
+          card.className = 'preview-card';
+          card.setAttribute('data-item', JSON.stringify({
+              id: item.id,
+              title: item.title || item.name,
+              poster_path: item.poster_path,
+              overview: item.overview,
+              vote_average: item.vote_average,
+              release_date: item.release_date || item.first_air_date,
+              mediaType: window.currentType
+          }));
+
+          const title = window.currentType === 'movie' ? item.title : item.name;
+          const date = window.currentType === 'movie' ? item.release_date : item.first_air_date;
+
+          card.innerHTML = `
               <div class="rank-badge">#${((window.currentPage - 1) * 20) + index + 1}</div>
               <img src="https://image.tmdb.org/t/p/w500${item.poster_path}" alt="${title}">
               <div class="card-content">
-                <h3>${title}</h3>
-                <p class="rating">⭐ ${item.vote_average.toFixed(1)}/10</p>
-                <p class="release-year">${date ? new Date(date).getFullYear() : 'N/A'}</p>
+                  <h3>${title}</h3>
+                  <p class="rating">⭐ ${item.vote_average.toFixed(1)}/10</p>
+                  <p class="release-year">${date ? new Date(date).getFullYear() : 'N/A'}</p>
               </div>
-            `;
-            grid.appendChild(card);
-          });
-          if (window.currentPage >= 5) {
-            loadMoreButton.style.display = 'none';
-          }
-        } catch (error) {
-          console.error('Fehler beim Laden weiterer Titel:', error);
-          movieResults.innerHTML = `<p>Fehler beim Laden weiterer Titel: ${error.message}</p>`;
-        }
+          `;
+
+          grid.appendChild(card);
       });
+
+      // 🆕 Event-Listener erneut hinzufügen, um neue Karten anklickbar zu machen
+      attachPreviewCardClickEvents();
+
+      if (window.currentPage >= 5) {
+          loadMoreButton.style.display = 'none';
+      }
+  } catch (error) {
+      console.error('Fehler beim Laden weiterer Titel:', error);
+      movieResults.innerHTML = `<p>Fehler beim Laden weiterer Titel: ${error.message}</p>`;
+  }
+}
+
+
+
+// Top-Filme laden
+async function loadTopMovies() {
+    totalCardsLoaded = 0; // Reset nur beim expliziten Laden neuer Inhalte
+    window.currentPage = 1; 
+    window.currentType = 'movie'; 
+    try {
+        const data = await fetchFromTMDB(`/movie/top_rated?language=de-DE&page=${window.currentPage}`);
+        console.log('Top Filme:', data);
+        displayTopContent(data.results, 'movie');
+    } catch (error) {
+        console.error('Fehler beim Laden der Top-Filme:', error);
     }
+}
+
+// Event Listener für Top 100 Button
+document.addEventListener('DOMContentLoaded', () => {
+    const top100MoviesButton = document.getElementById('top100MoviesButton');
+
+    if (top100MoviesButton) {
+        top100MoviesButton.addEventListener('click', loadTopMovies);
+    }
+
+    if (document.getElementById('movieResults')) {
+        loadTopMovies();
+    }
+});
+
+
     
   
     // Standardmäßig Top Filme laden, falls #movieResults existiert (Startseite)
@@ -248,9 +315,7 @@ window.showDetailCard = showDetailCard;
 // Export der Funktionen
 
  
-let selectedGenre = '';
-let currentPage = 1;
-window.currentPage = currentPage;        // global
+let selectedGenre = '';       // global
 let allResults = []; // Alle bisher geladenen Ergebnisse
 let favorites = []; // Favoriten-Array
 let isLoading = false;
@@ -525,7 +590,7 @@ async function showDetailCard(item) {
             <!-- Rechte Gruppe: Watched, Planned, Favorit (Herz) -->
             <div class="right-group">
               <button class="watched-button">Watched</button>
-              <button class="planned-button">Planned to Watch</button>
+              <button class="planned-button">Planned</button>
               <button class="favorite-button">
                 <span class="heart-icon">&#9825;</span>
               </button>
@@ -673,8 +738,21 @@ if (loadMoreButton) {
           data.results.forEach((item, index) => {
               const card = document.createElement('div');
               card.className = 'preview-card';
+              
+              // NEU: data-item-Attribut setzen, damit showDetailCard() funktioniert
+              card.setAttribute('data-item', JSON.stringify({
+                id: item.id,
+                title: window.currentType === 'movie' ? item.title : item.name,
+                poster_path: item.poster_path,
+                overview: item.overview,
+                vote_average: item.vote_average,
+                release_date: item.release_date || item.first_air_date,
+                mediaType: window.currentType
+              }));
+
               const title = window.currentType === 'movie' ? item.title : item.name;
               const date = window.currentType === 'movie' ? item.release_date : item.first_air_date;
+
               card.innerHTML = `
                   <div class="rank-badge">#${((window.currentPage - 1) * 20) + index + 1}</div>
                   <img src="https://image.tmdb.org/t/p/w500${item.poster_path}" alt="${title}">
@@ -686,7 +764,10 @@ if (loadMoreButton) {
               `;
               grid.appendChild(card);
           });
-          
+
+          // NEU: Die Event-Listener für alle neu erstellten Karten aktivieren
+          attachPreviewCardClickEvents();
+
           if (window.currentPage >= 5) {
               loadMoreButton.style.display = 'none';
           }
@@ -698,6 +779,7 @@ if (loadMoreButton) {
 } else {
   console.error("Element mit ID 'loadMoreButton' wurde nicht gefunden.");
 }
+
 
 // Dropdown Toggle Funktion
 function toggleDropdown() {
@@ -1151,4 +1233,17 @@ async function togglePlanned(item) {
     } catch (error) {
         console.error('Fehler bei Planned:', error);
     }
+}
+
+function attachPreviewCardClickEvents() {
+  const previewCards = document.querySelectorAll('.preview-card');
+  previewCards.forEach(card => {
+      card.removeEventListener('click', handlePreviewCardClick); // Event Listener zuerst entfernen, um doppelte Aufrufe zu vermeiden
+      card.addEventListener('click', handlePreviewCardClick);
+  });
+}
+
+function handlePreviewCardClick(event) {
+  const itemData = JSON.parse(event.currentTarget.getAttribute('data-item'));
+  showDetailCard(itemData);
 }
